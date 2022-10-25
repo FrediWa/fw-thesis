@@ -1,4 +1,5 @@
-const KRISTALLEN = "mxl/Kristallen_den_fina_t1.mxl"
+const KRISTALLEN1 = "mxl/Kristallen_den_fina_t1.mxl"
+const KRISTALLEN2 = "mxl/Kristallen_den_fina_t2.musicxml"
 const HALVAN = "mxl/Halvan_b1.mxl"
 
 const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-container");
@@ -8,7 +9,7 @@ const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-container");
     // drawingParameters: "compacttight" // don't display title, composer etc., smaller margins
   });
   osmd
-    .load(KRISTALLEN)
+    .load(KRISTALLEN1)
     .then(
       function() {
         osmd.render();
