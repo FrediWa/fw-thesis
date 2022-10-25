@@ -11,9 +11,7 @@
 </head
 
 <body>
-    <script>
-        let cancel = false;
-    </script>
+
     <!-- Loading overlay -->
     <div id="load-overlay">
         Loading
@@ -29,14 +27,14 @@
 
     <!-- Control container -->
     <div id="control-side">
-        <button onclick="cancel = true">Cancel</button>
+        <button onclick="pause = true">pause</button>
         <input type="checkbox" id="control-test-mode" name="test-mode" value="1">
         <label for="test-mode"> Test test-mode</label><br>
         <div id="playback-control">
             <input type="checkbox" id="control-play-pause" name="play-pause" value="0">
             <label for="control-play-pause">
                 <i class="fa-solid fa-play"></i>
-                <i class="fa-solid fa-stop"></i>
+                <i class="fa-solid fa-pause"></i>
             </label>
         </div>
         <input type="checkbox" id="control-current-mesure" name="current-measure" value="0">
@@ -48,6 +46,9 @@
 
     <!-- Pitch information container -->
     <div id="pitch-info"></div>
+
+    <!-- Global state -->
+    <script src="scripts/states.js"></script>
 
     <!-- Handle exercise -->
     <script src="scripts/exercises.js"></script>

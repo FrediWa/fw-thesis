@@ -48,8 +48,8 @@ header {
 
 /* Play/Pause button state styles */
 
-input#control-play-pause                                 { display: none; }
-input#control-play-pause:checked       ~ label i.fa-play { display: none; }
-input#control-play-pause:not(:checked) ~ label i.fa-stop { display: none; }
+input#control-play-pause                                  { display: none; }
+input#control-play-pause:checked       ~ label i.fa-play  { display: none; }
+input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
 
 

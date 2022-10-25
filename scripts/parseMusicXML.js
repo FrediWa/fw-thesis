@@ -1,7 +1,6 @@
 
 
 
-
 function getNoteFrequency(note){
     const MIDDLE_A = 69
     const EQT      = 1.059463094359
