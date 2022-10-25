@@ -1,3 +1,6 @@
+const KRISTALLEN = "mxl/Kristallen_den_fina_t1.mxl"
+const HALVAN = "mxl/Halvan_b1.mxl"
+
 const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-container");
   osmd.setOptions({
     backend: "svg",
@@ -5,7 +8,7 @@ const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-container");
     // drawingParameters: "compacttight" // don't display title, composer etc., smaller margins
   });
   osmd
-    .load("chopin.mxl")
+    .load(KRISTALLEN)
     .then(
       function() {
         osmd.render();

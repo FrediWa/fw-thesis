@@ -11,6 +11,9 @@
 </head
 
 <body>
+    <script>
+        let cancel = false;
+    </script>
     <!-- Loading overlay -->
     <div id="load-overlay">
         Loading
@@ -26,6 +29,7 @@
 
     <!-- Control container -->
     <div id="control-side">
+        <button onclick="cancel = true">Cancel</button>
         <input type="checkbox" id="control-test-mode" name="test-mode" value="1">
         <label for="test-mode"> Test test-mode</label><br>
         <div id="playback-control">
@@ -40,6 +44,7 @@
         <input type="checkbox" id="control-metronome" name="metronome" value="0">
         <label for="current-measure">Metronote</label><br>
     </div>
+
 
     <!-- Pitch information container -->
     <div id="pitch-info"></div>
