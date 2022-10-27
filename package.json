@@ -10,5 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.6"
+  },
+  "devDependencies": {
+    "minify-all-js": "^0.1.9"
   }
 }

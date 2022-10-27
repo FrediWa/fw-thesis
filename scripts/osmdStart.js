@@ -1,8 +1,7 @@
-const PATH = "./mxl/"
-const KRISTALLEN = "Kristallen_den_fina_t1.mxl"
+const KRISTALLEN = "Kristallen_den_fina_t2.musicxml"
 
 
-function loadSheetMusic(id){
+function loadSheetMusic(trackName, context){
 
   const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-container");
   osmd.setOptions({
@@ -11,7 +10,7 @@ function loadSheetMusic(id){
     // drawingParameters: "compacttight" // don't display title, composer etc., smaller margins
   });
   osmd
-  .load(PATH + id)
+  .load(PATH + trackName)
   .then(
     function() {
       osmd.render();
@@ -22,9 +21,9 @@ function loadSheetMusic(id){
       document.querySelector("#osmd-container").style.opacity = 1;
 
       console.log(osmd)
+      ApplicationContext.osmd = osmd
     }
     );
-    return osmd
   }
 
-  const osmd = loadSheetMusic(KRISTALLEN)
+loadSheetMusic(KRISTALLEN)

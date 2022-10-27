@@ -2,10 +2,10 @@ appContext = ApplicationContext;
 
 // Statics
 let arr2 = [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007];
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 const startPauseButton = document.getElementById("control-play-pause");
+
+// Helper functions
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function nonPeriodicTimer(arr, i, context) {
     // https://stackoverflow.com/questions/46242600/recursive-async-function-in-javascript
@@ -41,6 +41,19 @@ function pausePlay(context){
 async function play(arr, start, context){
     context.pause = false;
     return await nonPeriodicTimer(arr, start, context)
+}
+
+function disableInput(elementId){
+    const input = document.getElementById(elementId);
+    input.disabled = true;
+    input.classList.add("control-inactive")
+}
+
+function enableInput(){
+    const input = document.getElementById(elementId);
+    input.disabled = false;
+    input.classList.remove("control-inactive")
+
 }
 
 startPauseButton.addEventListener('change', async function ( e ) {

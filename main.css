@@ -48,6 +48,16 @@ header {
     border-left: 1px solid #333;
 }
 
+.control-input {
+    cursor: pointer;
+}
+
+.control-inactive {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#control-play-restart { display: none; }
 /* Play/Pause button state styles */
 
 input#control-play-pause                                  { display: none; }
