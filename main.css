@@ -24,7 +24,7 @@ header {
 
     backdrop-filter: blur(12px);
     opacity: 1;
-    transition: opacity 0.3s cubic-bezier(.38,.03,.62,.98) 0.2s,
+    transition: visibility 0.3s cubic-bezier(.38,.03,.62,.98) 0.2s,
                 height 0s linear 0.5s;
 }
 

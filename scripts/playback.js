@@ -10,7 +10,7 @@ const startPauseButton = document.getElementById("control-play-pause");
 async function nonPeriodicTimer(arr, i, context) {
     // https://stackoverflow.com/questions/46242600/recursive-async-function-in-javascript
 
-    // Recursion exit
+    // Recursion exit condition
     if ( i == arr.length ) {
         startPauseButton.checked = false;
         context.lastIndex = -1;
@@ -19,6 +19,7 @@ async function nonPeriodicTimer(arr, i, context) {
     // Update last index
     context.lastIndex = (i-1);
 
+    // Stop if pause
     if ( context.pause ){
         return
     }
@@ -26,11 +27,11 @@ async function nonPeriodicTimer(arr, i, context) {
     // Do stuff
     console.log(arr[i])
 
-
     // Sleep
     await sleep(arr[i])
 
-    return nonPeriodicTimer(arr, ++i, context);
+    // Repeat
+    nonPeriodicTimer(arr, ++i, context);
 }
 
 function pausePlay(context){

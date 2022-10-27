@@ -29,20 +29,26 @@
 
     <!-- Control container -->
     <div id="control-side">
-        <button onclick="pause = true">pause</button>
-        <input type="checkbox" id="control-test-mode" name="test-mode" value="1">
-        <label for="test-mode"> Test test-mode</label><br>
-        <div id="playback-control">
-            <input type="checkbox" id="control-play-pause" name="play-pause" value="0">
-            <label for="control-play-pause">
-                <i class="fa-solid fa-play"></i>
-                <i class="fa-solid fa-pause"></i>
-            </label>
+        <div id="control-test-section">
+            <h2>Test</h2>
+            <button type="checkbox" id="control-test-mode" name="test-mode" value="1">Start</button>
+            <button type="checkbox" id="control-test-mode" name="start-tone" value="1">Play start tone</button>
         </div>
-        <input type="checkbox" id="control-current-mesure" name="current-measure" value="0">
-        <label for="current-measure"> Highlight current measure</label><br>
-        <input type="checkbox" id="control-metronome" name="metronome" value="0">
-        <label for="current-measure">Metronote</label><br>
+        <hr>
+        <div id="control-practice-section">
+            <h2>Practice</h2>
+            <div id="playback-control">
+                <input type="checkbox" id="control-play-pause" name="play-pause" value="0">
+                <label for="control-play-pause">
+                    <i class="fa-solid fa-play"></i>
+                    <i class="fa-solid fa-pause"></i>
+                </label>
+            </div>
+            <input type="checkbox" id="control-current-mesure" name="current-measure" value="0">
+            <label for="current-measure"> Highlight current measure</label><br>
+            <input type="checkbox" id="control-metronome" name="metronome" value="0">
+            <label for="current-measure">Metronote</label><br>
+        </div>
     </div>
 
 
@@ -60,8 +66,13 @@
     <script src="scripts/osmdStart.js"></script>
     <script src="scripts/osmdDifferentPlayback.js"></script>
 
+    <!-- Script for IPF generation -->
+    <script src="scripts/generateIPF.js"></script>
+
     <!-- Playback script -->
     <script src="scripts/playback.js"></script>
+
+    <script src="scripts/start.js"></script>
 
 </body>
 </html>

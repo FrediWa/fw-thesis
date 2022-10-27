@@ -4,4 +4,4 @@ const osmd2 = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-null");
     drawTitle: false,
     // drawingParameters: "compacttight" // don't display title, composer etc., smaller margins
   });
-  osmd2.load(KRISTALLEN2)
+  osmd2.load(PATH + KRISTALLEN)
