@@ -7,5 +7,6 @@ const ApplicationContext = {
         lastIndex: -1,
         differentSheets: 0,
         osmd: null,
-        playbackArray: []
+        ipf: [],
+        drawnNotes: [],
 }

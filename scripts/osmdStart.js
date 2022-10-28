@@ -22,6 +22,7 @@ function loadSheetMusic(trackName, context){
 
       console.log(osmd)
       ApplicationContext.osmd = osmd
+      ApplicationContext.drawnNotes = document.getElementsByClassName("vf-stavenote")
     }
     );
   }

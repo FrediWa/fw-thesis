@@ -22,6 +22,7 @@
 
     </header>
 
+    <div id="playback-cursor"></div>
     <!-- Sheet music container -->
     <div id="osmd-container"></div>
     <!-- Null container for the OSMD only used for playback -->
@@ -45,18 +46,17 @@
                     <i class="fa-solid fa-pause"></i>
                 </label>
 
-                <input type="button" id="control-play-restart" name="play-restart">
-                <label class="control-input" for="control-plat-restart">
-                    <i class="fa-solid fa-stop"></i>
-                </label>
+                <button class="control-input" id="control-play-restart" name="play-restart">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
             </div>
 
             <h3>Options</h3>
             <input class="control-input" type="checkbox" id="control-cursor-show" name="cursor-show" checked="true">
             <label class="control-input" for="control-cursor-show"> Show cursor</label><br>
 
-            <input type="checkbox" id="control-metronome" name="metronome" value="0">
-            <label for="current-measure">Metronote</label><br>
+            <input class="control-input"  type="checkbox" id="control-metronome" name="metronome" value="0">
+            <label class="control-input"  for="control-metronome">Metronote</label><br>
         </div>
     </div>
 

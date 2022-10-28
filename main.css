@@ -57,10 +57,16 @@ header {
     opacity: 0.5;
 }
 
-#control-play-restart { display: none; }
+#playback-cursor {
+    display: none;
+    position: absolute;
+    background-color: red;
+}
+
+#control-play-restart { border: 0; background-color: transparent; font-size: 1.1rem;}
 /* Play/Pause button state styles */
 
-input#control-play-pause                                  { display: none; }
+input#control-play-pause                                  { display: none;  font-size: 1.1rem;}
 input#control-play-pause:checked       ~ label i.fa-play  { display: none; }
 input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
 

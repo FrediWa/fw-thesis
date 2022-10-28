@@ -6,6 +6,6 @@ function getPlaybackArray(trackName, context){
     drawTitle: false,
   });
   playback.load(PATH + trackName).then({function(){
-    context.playbackArray = generateIPFfromOSMD(playback)
+    context.ipf = generateIPFfromOSMD(playback)
   }})
 }
