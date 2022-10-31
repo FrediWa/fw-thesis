@@ -19,10 +19,9 @@ function generateIPFfromOSMD(osmdObject){
             for (let j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 // Skip rests and muted notes
-                if ( note != null && note.halfTone != 0 && !note.isRest() ) {
-                    let duration = note.length.numerator / note.length.denominator;
-
-
+                if ( note != null) {
+                    console.log(note)
+                    let duration = (note.length.numerator / note.length.denominator) * ( 120 / note.sourceMeasure.tempoInBPM ) * 2000;
 
                     allNotes.push({
                         "note": note.halfTone,
@@ -36,7 +35,7 @@ function generateIPFfromOSMD(osmdObject){
         iterator.moveToNext()
     }
 
-    // Combine adjecent slurred notes of sae pitch
+    // Combine adjecent slurred notes of same pitch
     const IPF = []
     for(let i = 0; i < allNotes.length; i++){
 
@@ -62,5 +61,5 @@ function generateIPFfromOSMD(osmdObject){
             IPF.push(current)
         }
     }
-    return IPF;
+    ApplicationContext.ipf = IPF;
 }

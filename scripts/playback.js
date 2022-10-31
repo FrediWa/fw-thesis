@@ -1,7 +1,20 @@
 appContext = ApplicationContext;
 
+
+function getNoteFrequency(note){
+    const MIDDLE_A = 69
+    const EQT      = 1.059463094359
+
+    // https://pages.mtu.edu/~suits/NoteFreqCalcs.html
+    // Accessed 25 Oct 2022
+
+    const noteDiff  = note - MIDDLE_A;
+    const frequency = 440 * Math.pow(EQT, noteDiff);
+
+    return parseInt(frequency * 100) / 100
+}
 // Statics
-let arr2 = [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007];
+let arr2 = [500, 250, 250, 1000, 250, 250, 500, 1000];
 
 const startPauseButton = document.getElementById("control-play-pause");
 const restartButton    = document.getElementById("control-play-restart");
@@ -35,13 +48,16 @@ function drawCursor(context, i) {
 // Helper functions
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-async function nonPeriodicTimer(arr, i, context) {
+async function nonPeriodicTimer(ipf, i, context) {
     // https://stackoverflow.com/questions/46242600/recursive-async-function-in-javascript
-
+    const now = Tone.now()
+    console.log("timer")
+    console.log(ipf)
     // Recursion exit condition
-    if ( i == arr.length ) {
+    if ( i == ipf.length ) {
         startPauseButton.checked = false;
         context.lastIndex = -1;
+        synth.triggerRelease(now)
         return
     }
     // Update last index
@@ -50,20 +66,28 @@ async function nonPeriodicTimer(arr, i, context) {
     // Stop if pause
     if ( context.pause ){
         startPauseButton.checked = false;
+        synth.triggerRelease(now)
         return
     }
 
-    // Do stuff
-    // console.log()
+    if(ipf[i].note != 0){
+
+        // trigger the attack immediately
+        synth.triggerAttack(getNoteFrequency(ipf[i].note + 12), now)
+        // wait one second before triggering the release
+        synth.triggerRelease(now + ipf[i].duration)
+        // Do stuff
+    }
+    console.log(ipf[i])
 
     drawCursor(context, i)
     playCurrentNote(context, i);
 
     // Sleep
-    await sleep(arr[i])
+    await sleep(ipf[i].duration)
 
     // Repeat
-    nonPeriodicTimer(arr, ++i, context);
+    nonPeriodicTimer(ipf, ++i, context);
 }
 
 
@@ -81,11 +105,11 @@ function pausePlay(context){
     enableInput(restartButton)
 }
 
-async function play(arr, start, context){
+async function play(ipf, start, context){
     disableInput(restartButton)
     context.pause = false;
 
-    return await nonPeriodicTimer(arr, start, context)
+    return await nonPeriodicTimer(ipf, start, context)
 }
 
 function disableInput(element, useId=false){
@@ -107,8 +131,8 @@ startPauseButton.addEventListener('change', async function ( e ) {
     const state = startPauseButton.checked
     if ( state ) {
         await Tone.start()
-        // await play(arr2, appContext.lastIndex + 1, appContext)
-        startPeriodicTimer(1000, appContext)
+        await play(appContext.ipf, appContext.lastIndex + 1, appContext)
+        // startPeriodicTimer(1000, appContext)
     } else if ( !state ){
         pausePlay(appContext)
     }
