@@ -61,7 +61,7 @@ document.getElementById("sheet-selection").addEventListener("change", () => {
 
 // Change playback track
 document.getElementById("playback-selection").addEventListener("change", () => {
-
+    // ApplicationContext.playbackOsmd =
 });
 
 // Fetch JSON and populate collections dropdown
@@ -71,7 +71,8 @@ fetch("../exercises/exercises.json")
     populateCollections(data);
     ApplicationContext.data = data;
     // Set default
-    document.getElementById('collection-selection').value="0";
-    populateSheetAndPlayback(0)
+    const DEFAULT_COLLECTION = 0
+    document.getElementById('collection-selection').value = DEFAULT_COLLECTION;
+    populateSheetAndPlayback(DEFAULT_COLLECTION)
 
   });

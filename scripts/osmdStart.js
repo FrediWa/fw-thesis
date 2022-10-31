@@ -1,3 +1,13 @@
+function loadPlayback(trackName, context){
+  const osmd = context.playbackOsmd
+  osmd.setOptions({
+    backend: "svg",
+    drawTitle: false,
+  });
+  osmd
+  .load(trackName)
+}
+
 function loadSheetMusic(trackName, context){
 
   const osmd = context.osmd;
@@ -6,7 +16,6 @@ function loadSheetMusic(trackName, context){
   osmd.setOptions({
     backend: "svg",
     drawTitle: false,
-    // drawingParameters: "compacttight" // don't display title, composer etc., smaller margins
   });
   osmd
   .load(trackName)
@@ -19,15 +28,23 @@ function loadSheetMusic(trackName, context){
       document.querySelector("#load-overlay").style.height = 0;
       document.querySelector("#osmd-container").style.opacity = 1;
 
-      // context.drawnNotes = document.getElementsByClassName("vf-stavenote")
     }
     );
   }
 
 function osmdInit(context) {
+
+  // Init both sheet osmd and playback osmd
   const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-container");
+  const playbackOsmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-null");
+
   context.osmd = osmd;
-  loadSheetMusic("mxl/Kristallen_den_fina_t1.mxl", context);
+  context.playbackOsmd = playbackOsmd;
+
+  // This should be the first track in the default collection set in exercises.js
+  const DEFAULT = "mxl/Kristallen_den_fina_t1.mxl"
+  loadSheetMusic(DEFAULT, context);
+  loadPlayback(DEFAULT, context)
 }
 
 osmdInit(ApplicationContext)
