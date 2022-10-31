@@ -1,7 +1,3 @@
-const KRISTALLEN = "Kristallen_den_fina_t2.musicxml"
-const KRISTALLEN1 = "Kristallen_den_fina_t1.mxl"
-const DEFAULT = "Kristallen_den_fina_t2.musicxml"
-
 function loadSheetMusic(trackName, context){
 
   const osmd = context.osmd;
@@ -31,7 +27,7 @@ function loadSheetMusic(trackName, context){
 function osmdInit(context) {
   const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd-container");
   context.osmd = osmd;
-  loadSheetMusic(PATH + DEFAULT, context);
+  loadSheetMusic("mxl/Kristallen_den_fina_t1.mxl", context);
 }
 
 osmdInit(ApplicationContext)
