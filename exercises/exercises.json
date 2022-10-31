@@ -1,3 +1,20 @@
 {
-    "test": 123
+    "exerciseSrcURLList": [
+        {
+            "collectionID": 1,
+            "collectionName": "Kristallen den fina TTBB",
+            "trackURLS": [
+                {"id": 10, "name": "Kristallen den fina T1", "url": "mxl/Kristallen_den_fina_t1.mxl"},
+                {"id": 11, "name": "Kristallen den fina T2", "url": "mxl/Kristallen_den_fina_t2.musicxml"}
+            ]
+        },
+        {
+            "collectionID": 2,
+            "collectionName": "Stridsrop Halfvan TTBB",
+            "tracks": [
+                {"id": 20, "name": "Halvan B1 (binary MXL)", "url": "mxl/Halvan_b1.mxl"},
+                {"id": 21, "name": "Halvan B1", "url": "mxl/Halvan_b1.musicxml"}
+            ]
+        }
+    ]
 }

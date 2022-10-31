@@ -19,6 +19,26 @@
 
     <!-- Header -->
     <header>
+        <section id="track-selection-section">
+            <div id="track-collection-selection-container">
+                <label for="collection-selection">Select collection</label>
+                <select id="collection-selection">
+                </select>
+            </div>
+
+            <div id="track-selection-container">
+                <div>
+                    <label for="sheet-selection">Select sheet</label>
+                    <select id="sheet-selection">
+                    </select>
+                </div>
+                <div>
+                    <label for="playback-selection">Select playback</label>
+                    <select id="playback-selection">
+                    </select>
+                </div>
+            </div>
+        </section>
 
     </header>
 
@@ -60,6 +80,8 @@
         </div>
     </div>
 
+    <!-- Import Tone.js -->
+    <script src="http://unpkg.com/tone"></script>
 
     <!-- Pitch information container -->
     <div id="pitch-info"></div>

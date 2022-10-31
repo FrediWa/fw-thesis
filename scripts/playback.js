@@ -7,7 +7,13 @@ const startPauseButton = document.getElementById("control-play-pause");
 const restartButton    = document.getElementById("control-play-restart");
 const cursor           = document.getElementById("playback-cursor");
 
-function drawCursor(context, i){
+const synth = new Tone.Synth().toDestination();
+
+function playCurrentNote(context, i) {
+
+}
+
+function drawCursor(context, i) {
     const element = context.drawnNotes[i]
     const cursor = context.osmd.cursor;
     cursor.show()
@@ -51,12 +57,23 @@ async function nonPeriodicTimer(arr, i, context) {
     // console.log()
 
     drawCursor(context, i)
+    playCurrentNote(context, i);
 
     // Sleep
     await sleep(arr[i])
 
     // Repeat
     nonPeriodicTimer(arr, ++i, context);
+}
+
+
+function periodicTimer(context){
+    console.log(context)
+
+}
+
+function startPeriodicTimer(interval, context){
+    setInterval(periodicTimer, interval, context)
 }
 
 function pausePlay(context){
@@ -89,7 +106,9 @@ function enableInput(element, useId=false){
 startPauseButton.addEventListener('change', async function ( e ) {
     const state = startPauseButton.checked
     if ( state ) {
-        await play(arr2, appContext.lastIndex + 1, appContext)
+        await Tone.start()
+        // await play(arr2, appContext.lastIndex + 1, appContext)
+        startPeriodicTimer(1000, appContext)
     } else if ( !state ){
         pausePlay(appContext)
     }

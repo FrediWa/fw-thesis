@@ -71,3 +71,25 @@ input#control-play-pause:checked       ~ label i.fa-play  { display: none; }
 input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
 
 
+/* Track selection container*/
+#track-selection-section label { display: block; text-align: center; }
+
+#track-collection-selection-container {
+    width: 300px;
+    margin: 0 auto;
+}
+#track-selection-container {
+    width: 400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+#track-selection-container > div {
+    text-align: center;
+}
+
+#sheet-selection, #playback-selection, #collection-selection {
+    width: 90%;
+    margin: 10px 5%;
+}

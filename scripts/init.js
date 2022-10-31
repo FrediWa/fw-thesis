@@ -3,10 +3,12 @@ const PATH = "./mxl/"
 
 // Initialize application context
 const ApplicationContext = {
+        appReady: false,
         pause: false,
         lastIndex: -1,
         differentSheets: 0,
         osmd: null,
         ipf: [],
         drawnNotes: [],
+        metronome: false,
 }
