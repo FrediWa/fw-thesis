@@ -13,6 +13,7 @@ function generateIPFfromOSMD(osmdObject){
     // Iterate over sheet
     while ( !iterator.EndReached ) {
         const voices = iterator.CurrentVoiceEntries;
+
         for (let i = 0; i < voices.length; i++) {
             const v = voices[i];
             const notes = v.Notes;

@@ -28,9 +28,7 @@ function playCurrentNote(context, i) {
 
 function drawCursor(context, i) {
     const element = context.drawnNotes[i]
-    const cursor = context.osmd.cursor;
-    cursor.show()
-    console.log("hsefioj", cursor)
+    
 
     // const noteBB = element.getBoundingClientRect();
     // const {topS, rightS, bottomS, leftS} = lastSlurElement.getBoundingClientRect(lastSlurElement);
@@ -92,7 +90,9 @@ async function nonPeriodicTimer(ipf, i, context) {
 
 
 function periodicTimer(context){
-    console.log(context)
+    
+    const currentMeasure = context.osmd.graphic.measureList[context.currentMeasure]
+    console.log(context.currentMeasure++)
 
 }
 
@@ -109,7 +109,8 @@ async function play(ipf, start, context){
     disableInput(restartButton)
     context.pause = false;
 
-    return await nonPeriodicTimer(ipf, start, context)
+    //return await nonPeriodicTimer(ipf, start, context)
+    startPeriodicTimer(1000, context)
 }
 
 function disableInput(element, useId=false){
@@ -131,8 +132,8 @@ startPauseButton.addEventListener('change', async function ( e ) {
     const state = startPauseButton.checked
     if ( state ) {
         await Tone.start()
-        await play(appContext.ipf, appContext.lastIndex + 1, appContext)
-        // startPeriodicTimer(1000, appContext)
+        //await play(appContext.ipf, appContext.lastIndex + 1, appContext)
+        startPeriodicTimer(1000, appContext)
     } else if ( !state ){
         pausePlay(appContext)
     }
