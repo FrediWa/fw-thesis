@@ -20,7 +20,8 @@
             "collectionID": 2,
             "collectionName": "Development Tests",
             "tracks": [
-                {"id": 20, "name": "Repeat Test", "url": "mxl/repeatTest.mxl"}
+                {"id": 20, "name": "Repeat Test", "url": "mxl/repeatTest.mxl"},
+                {"id": 21, "name": "Pause Test", "url": "mxl/pauseTest.mxl"}
             ]
         }
     ]

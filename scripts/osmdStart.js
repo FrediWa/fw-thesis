@@ -6,6 +6,9 @@ function loadPlayback(trackName, context){
   });
   osmd
   .load(trackName)
+  .then(function(){
+    osmd.render();
+  })
 }
 
 function loadSheetMusic(trackName, context){

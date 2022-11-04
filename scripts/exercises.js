@@ -30,6 +30,7 @@ function populateSheetAndPlayback(value){
     });
 console.log(tracks)
     loadSheetMusic(tracks[0].url, ApplicationContext)
+    loadPlayback(tracks[0].url, ApplicationContext)
 
 }
 
