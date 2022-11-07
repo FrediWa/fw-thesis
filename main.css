@@ -58,8 +58,10 @@ header {
 }
 
 #playback-cursor {
-    display: none;
+    display: block;
     position: absolute;
+    left: 24px; top: 11px;
+    width: 22px; height: 13px;
     background-color: red;
 }
 

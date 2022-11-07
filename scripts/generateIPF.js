@@ -1,4 +1,11 @@
 
+function moveCursor(cursor, steps) {
+    for ( let i = 0; i < steps; i++ ) cursor.next();
+}
+
+function moveCursorToMeasure(cursor, measureIndex) {
+    while(cursor.iterator.currentMeasureIndex != measureIndex) cursor.next()
+}
 
 function generateIPF(context){
 
@@ -8,7 +15,7 @@ function generateIPF(context){
 
     const allNotes = [];
     const repeatMap = [];
-    const IPF = {"repeatMap": [], "measures":[], "dc": false};
+    const IPF = {"repeatMap": [], "measures":[], "dc": false, "firstAnacrusis": false};
     const sheetOsmd = context.osmd
     const playbackOsmd = context.playbackOsmd;
     const playbackMeasures = playbackOsmd.graphic.measureList;
@@ -16,6 +23,7 @@ function generateIPF(context){
     const measureTimingInfo = []
 
     // Assert that both OSMD object are atleast the same length
+    // Problematic when OSMD combines multiple only-rest measures into multimeasure rests
     if ( playbackMeasures.length !== sheetMeasures.length  && false) {
         console.error("Graphic and playback length mismatch");
         return undefined;
@@ -72,7 +80,8 @@ function generateIPF(context){
     // Reset cursor
     playbackOsmd.cursor.reset()
     const iterator = playbackOsmd.cursor.Iterator;
-
+    let noteOffset = 0;
+    let previousMeasureNumber = 0;
     // Iterate over sheet
     while ( !iterator.EndReached ) {
         const voices = iterator.CurrentVoiceEntries;
@@ -84,16 +93,22 @@ function generateIPF(context){
             const notes = v.Notes;
             for (let j = 0; j < notes.length; j++) {
                 const note = notes[j];
+                if(note.sourceMeasure.measureNumber != previousMeasureNumber){
+                    previousMeasureNumber = note.sourceMeasure.measureNumber;
+                    noteOffset = 0;
+                }
                 // Skip rests and muted notes
+                console.log(note)
                 if ( note != null) {
-                    let duration = (note.length.numerator / note.length.denominator)
                     IPF.measures[note.sourceMeasure.measureNumber].notes.push({
                         "note": note.halfTone,
-                        "duration": duration,
+                        "duration": note.length.realValue,
                         "tempo": note.sourceMeasure.tempoInBPM,
-                        "slur": note.slurs.length !== 0
+                        "slur": note.slurs.length !== 0,
+                        "offset": noteOffset
                     })
                 }
+                noteOffset += note.length.realValue;
             }
         }
         iterator.moveToNext()

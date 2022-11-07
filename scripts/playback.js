@@ -1,5 +1,6 @@
 appContext = ApplicationContext;
 
+// MEMO: Add option to delay dacapo by one invisible measure
 
 function getNoteFrequency(note){
     const MIDDLE_A = 69
@@ -22,26 +23,12 @@ const cursor           = document.getElementById("playback-cursor");
 
 const synth = new Tone.Synth().toDestination();
 
+let timer = 0;
+
 function playCurrentNote(context, i) {
 
 }
 
-function drawCursor(context, i) {
-    const element = context.drawnNotes[i]
-    
-
-    // const noteBB = element.getBoundingClientRect();
-    // const {topS, rightS, bottomS, leftS} = lastSlurElement.getBoundingClientRect(lastSlurElement);
-
-    // cursor.style.display        = "block";
-    // cursor.style.left = noteBB.x
-    // cursor.style.top = noteBB.y
-    // cursor.style.width = noteBB.width
-    // cursor.style.height = noteBB.height
-
-    // console.log("w", clef.style.height,"l", cursor.style.width)
-
-}
 
 // Helper functions
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -90,14 +77,14 @@ async function nonPeriodicTimer(ipf, i, context) {
 
 
 function periodicTimer(context){
-    
+
     const currentMeasure = context.osmd.graphic.measureList[context.currentMeasure]
     console.log(context.currentMeasure++)
 
 }
 
 function startPeriodicTimer(interval, context){
-    setInterval(periodicTimer, interval, context)
+    return setInterval(periodicTimer, interval, context)
 }
 
 function pausePlay(context){
@@ -142,5 +129,5 @@ startPauseButton.addEventListener('change', async function ( e ) {
 restartButton.addEventListener("click", function (){
     console.log("clicke")
     appContext.lastIndex = -1;
-    drawCursor(appContext.drawnNotes[0])
+    // drawCursor(appContext.drawnNotes[0])
 })
