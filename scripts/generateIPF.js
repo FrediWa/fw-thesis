@@ -8,7 +8,7 @@ function generateIPF(context){
 
     const allNotes = [];
     const repeatMap = [];
-    const IPF = {"repeatMap": [], "measures":[]};
+    const IPF = {"repeatMap": [], "measures":[], "dc": false};
     const sheetOsmd = context.osmd
     const playbackOsmd = context.playbackOsmd;
     const playbackMeasures = playbackOsmd.graphic.measureList;
@@ -16,7 +16,7 @@ function generateIPF(context){
     const measureTimingInfo = []
 
     // Assert that both OSMD object are atleast the same length
-    if ( playbackMeasures.length !== sheetMeasures.length ) {
+    if ( playbackMeasures.length !== sheetMeasures.length  && false) {
         console.error("Graphic and playback length mismatch");
         return undefined;
     }
@@ -35,10 +35,12 @@ function generateIPF(context){
         );
 
         // Find repeat starts and ends
-        if(parentSourceMeasure.firstRepetitionInstructions.length > 0 ) {
+        if(parentSourceMeasure.firstRepetitionInstructions.length > 0
+            && parentSourceMeasure.firstRepetitionInstructions[0].type == 0) {
             // Set starting point to current index
             repeatStart = i;
-        } else if(parentSourceMeasure.lastRepetitionInstructions.length > 0 ) {
+        } else if(parentSourceMeasure.lastRepetitionInstructions.length > 0
+            && parentSourceMeasure.lastRepetitionInstructions[0].type == 2) {
             // Set repeat end to current index
             repeatEnd = i;
 
@@ -52,11 +54,20 @@ function generateIPF(context){
             repeatStart = 0;
         }
 
+
     }
+
+    // Handle Da Capo and similar instructions
+    const repeatTypes = [
+        4, // DC
+        9, // DC AF
+        10 // DS AC
+    ]; // List of enums according to OSMD's RepetitionInstructions.ts
+    const lastMeasureRepetitionInstructions = context.playbackOsmd.sheet.sourceMeasures.slice(-1)[0].lastRepetitionInstructions[0];
+    IPF.dc = repeatTypes.includes(lastMeasureRepetitionInstructions.type);
+
     // Add repeat map to IPF
     IPF.repeatMap = repeatMap
-
-    console.log(IPF)
 
     // Reset cursor
     playbackOsmd.cursor.reset()
