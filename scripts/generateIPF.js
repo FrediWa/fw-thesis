@@ -99,30 +99,5 @@ function generateIPF(context){
         iterator.moveToNext()
     }
 
-    // // Combine adjecent slurred notes of same pitch
-    // for(let i = 0; i < allNotes.length; i++){
-
-    //     const current = allNotes[i]
-
-    //     // Just push the last note
-    //     if(i == allNotes.length){
-    //         IPF.push(current)
-    //         continue
-    //     }
-
-    //     const next = allNotes[i+1]
-    //     // Combine adjacent slurred notes with same pitch
-    //     if(current.slur && next.slur && current.note === next.note ){
-    //         const combined = structuredClone(current);
-    //         combined.duration = current.duration + next.duration
-    //         console.log(current.duration, next.duration)
-    //         // Hop over next because it's a part of current and already accounted for
-    //         i++;
-    //         IPF.push(combined)
-    //     }else{
-    //         // Just push all other cases
-    //         IPF.push(current)
-    //     }
-    // }
     ApplicationContext.ipf = IPF;
 }
