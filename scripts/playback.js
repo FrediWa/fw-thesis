@@ -9,6 +9,7 @@ function getToneName(semitone) {
 
     /* --------------------------- */
     // THIS DOES NOT WORK
+    // for example semitone(F#) % 2 == 0
     const sharp = (semitone % 2 == 0) ? "" : "#";
     const note = (N[Math.floor((semitone % 12) / 2)]);
     /* --------------------------- */
