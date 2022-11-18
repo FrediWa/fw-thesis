@@ -1,17 +1,6 @@
-body{
-    display: block;
-    width: 100%;
-    height: 100vh;
-    margin: 0; padding:0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
-}
-
-header {
-    display: block;
-    width: 100%;
-    min-height: 15vh;
-}
+body   { display: block; width: 100%; height: 100vh; margin: 0; padding:0; overflow: hidden; }
+body   { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+header { display: block; width: 100%; min-height: 15vh; }
 
 #load-overlay {
     position: absolute;
@@ -21,7 +10,6 @@ header {
     justify-content: center;
     align-items: center;
     z-index: 100;
-
     backdrop-filter: blur(12px);
     opacity: 1;
     transition: visibility 0.3s cubic-bezier(.38,.03,.62,.98) 0.2s,
@@ -48,14 +36,8 @@ header {
     border-left: 1px solid #333;
 }
 
-.control-input {
-    cursor: pointer;
-}
-
-.control-inactive {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
+.control-input    { cursor: pointer; }
+.control-inactive { cursor: not-allowed; opacity: 0.5; }
 
 #playback-cursor {
     display: block;
@@ -66,20 +48,15 @@ header {
 }
 
 #control-play-restart { border: 0; background-color: transparent; font-size: 1.1rem;}
-/* Play/Pause button state styles */
 
+/* Play/Pause button state styles */
 input#control-play-pause                                  { display: none;  font-size: 1.1rem;}
 input#control-play-pause:checked       ~ label i.fa-play  { display: none; }
 input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
 
 
 /* Track selection container*/
-#track-selection-section label { display: block; text-align: center; }
 
-#track-collection-selection-container {
-    width: 300px;
-    margin: 0 auto;
-}
 #track-selection-container {
     width: 400px;
     margin: 0 auto;
@@ -87,11 +64,10 @@ input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
     grid-template-columns: 50% 50%;
 }
 
-#track-selection-container > div {
-    text-align: center;
-}
+#track-selection-section label        { display: block; text-align: center; }
+#track-collection-selection-container { width: 300px;   margin: 0 auto; }
+#track-selection-container > div      { text-align: center; }
 
-#sheet-selection, #playback-selection, #collection-selection {
-    width: 90%;
-    margin: 10px 5%;
-}
+#sheet-selection,
+#playback-selection,
+#collection-selection { width: 90%; margin: 10px 5%; }
