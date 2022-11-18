@@ -1,30 +1,27 @@
 
-function moveCursor(cursor, steps) {
-    for ( let i = 0; i < steps; i++ ) cursor.next();
+
+
+function isAnacrusis(timeSignature, measureDuration) {
+    // If measure duration mismatches with time signature, the current measure is anacrusis
+    return timeSignature.realValue != measureDuration.realValue;
 }
 
-function moveCursorToMeasure(cursor, measureIndex) {
-    while(cursor.iterator.currentMeasureIndex != measureIndex) cursor.next()
-}
 
 function generateIPF(context){
 
-    // Based on
-    // https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/wiki/Tutorial:-Extracting-note-timing-for-playing
-    // small changes made
 
-    const allNotes = [];
+
     const repeatMap = [];
-    const IPF = {"repeatMap": [], "measures":[], "dc": false, "firstAnacrusis": false};
+    const IPF = {"repeatMap": [], "measures":[], "dc": false, "startAnacrusis": false};
     const sheetOsmd = context.osmd
     const playbackOsmd = context.playbackOsmd;
     const playbackMeasures = playbackOsmd.graphic.measureList;
     const sheetMeasures = sheetOsmd.graphic.measureList;
-    const measureTimingInfo = []
 
     // Assert that both OSMD object are atleast the same length
-    // Problematic when OSMD combines multiple only-rest measures into multimeasure rests
-    if ( playbackMeasures.length !== sheetMeasures.length  && false) {
+    // TODO: Fix multirest
+    const enableLengthAssertion = false;
+    if ( playbackMeasures.length !== sheetMeasures.length  && enableLengthAssertion) {
         console.error("Graphic and playback length mismatch");
         return undefined;
     }
@@ -35,11 +32,13 @@ function generateIPF(context){
     for ( let i = 0; i < playbackMeasures.length; i++ ) {
         const currentMeasure = playbackMeasures[i];
         const parentSourceMeasure = currentMeasure[0].parentSourceMeasure;
-        IPF.measures.push({
-            "timeSignature": parentSourceMeasure.activeTimeSignature,
-            "tempo": parentSourceMeasure.tempoInBPM,
-            "notes": [],
-            "boundingBox": []}
+        IPF.measures.push(
+            {
+                "timeSignature": parentSourceMeasure.activeTimeSignature,
+                "tempo": parentSourceMeasure.tempoInBPM,
+                "notes": [],
+                "boundingBox": []
+            }
         );
 
         // Find repeat starts and ends
@@ -53,7 +52,7 @@ function generateIPF(context){
             repeatEnd = i;
 
             /* Push repeat instructions to index which corresponds to repeatEnd.
-            Thismakes it easy for the playback function to check if a repeat should
+            This makes it easy for the playback function to check if a repeat should
             occur after finishing the current measure */
 
             repeatMap[repeatEnd] = ([repeatStart, repeatEnd]);
@@ -77,6 +76,10 @@ function generateIPF(context){
     // Add repeat map to IPF
     IPF.repeatMap = repeatMap
 
+    // Based on
+    // https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/wiki/Tutorial:-Extracting-note-timing-for-playing
+    // small changes made
+
     // Reset cursor
     playbackOsmd.cursor.reset()
     const iterator = playbackOsmd.cursor.Iterator;
@@ -98,17 +101,21 @@ function generateIPF(context){
                     noteOffset = 0;
                 }
                 // Skip rests and muted notes
-                console.log(note)
-                if ( note != null) {
+                const currentMeasureDuration = note.sourceMeasure.duration;
+                const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
+                const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
+
+                // Skip anacrusis if it isn't the first measure
+                if ( note != null && (!anacrusis || (anacrusis && note.sourceMeasure.measureNumber == 0))) {
                     IPF.measures[note.sourceMeasure.measureNumber].notes.push({
-                        "note": note.halfTone,
-                        "duration": note.length.realValue,
+                        "note": note.halfTone + 12,
+                        "duration": note.length.realValue * 3,
                         "tempo": note.sourceMeasure.tempoInBPM,
                         "slur": note.slurs.length !== 0,
                         "offset": noteOffset
                     })
                 }
-                noteOffset += note.length.realValue;
+                noteOffset += note.length.realValue * 3;
             }
         }
         iterator.moveToNext()

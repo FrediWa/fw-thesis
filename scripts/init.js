@@ -11,6 +11,7 @@ const ApplicationContext = {
         osmd: null,
         playbackOsmd: null,
         ipf: [],
+        nextPlaybackMeasure: -1,
         drawnNotes: [],
         metronome: false,
 }

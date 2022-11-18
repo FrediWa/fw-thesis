@@ -2,88 +2,64 @@ appContext = ApplicationContext;
 
 // MEMO: Add option to delay dacapo by one invisible measure
 
-function getNoteFrequency(note){
-    const MIDDLE_A = 69
-    const EQT      = 1.059463094359
+function getToneName(semitone) {
+    const N = ["C", "D", "E", "F", "G", "A", "B", "C"];
+    semitone -= 12;
+    const octave = Math.floor(semitone / 12);
 
-    // https://pages.mtu.edu/~suits/NoteFreqCalcs.html
-    // Accessed 25 Oct 2022
-
-    const noteDiff  = note - MIDDLE_A;
-    const frequency = 440 * Math.pow(EQT, noteDiff);
-
-    return parseInt(frequency * 100) / 100
+    /* --------------------------- */
+    // THIS DOES NOT WORK
+    const sharp = (semitone % 2 == 0) ? "" : "#";
+    const note = (N[Math.floor((semitone % 12) / 2)]);
+    /* --------------------------- */
+    return `${note}${sharp}${octave}`;
 }
-// Statics
-let arr2 = [500, 250, 250, 1000, 250, 250, 500, 1000];
-
 const startPauseButton = document.getElementById("control-play-pause");
 const restartButton    = document.getElementById("control-play-restart");
-const cursor           = document.getElementById("playback-cursor");
+const cursorElement    = document.getElementById("playback-cursor");
 
 const synth = new Tone.Synth().toDestination();
 
 let timer = 0;
 
-function playCurrentNote(context, i) {
-
+function moveCursor(cursor, steps) {
+    cursor.show();
+    for ( let i = 0; i < steps; i++ ) cursor.next();
 }
 
+function moveCursorToMeasure(cursor, measureIndex) {
+    cursor.reset()
+    while ( cursor.iterstor.currentMeasureIndex != measureIndex ) cursor.next()
+}
 
-// Helper functions
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-async function nonPeriodicTimer(ipf, i, context) {
-    // https://stackoverflow.com/questions/46242600/recursive-async-function-in-javascript
+function playMeasure(context, measureIndex, tempo){
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
     const now = Tone.now()
-    console.log("timer")
-    console.log(ipf)
-    // Recursion exit condition
-    if ( i == ipf.length ) {
-        startPauseButton.checked = false;
-        context.lastIndex = -1;
-        synth.triggerRelease(now)
-        return
-    }
-    // Update last index
-    context.lastIndex = (i-1);
-
-    // Stop if pause
-    if ( context.pause ){
-        startPauseButton.checked = false;
-        synth.triggerRelease(now)
-        return
+    const notes = context.ipf.measures[measureIndex].notes;
+    for( let i = 0; i < notes.length; i++){
+        synth.triggerAttack(notes[i].note, now + notes[i].offset);
+        synth.triggerRelease(notes[i].note, now + notes[i].offset + notes[i].duration);
     }
 
-    if(ipf[i].note != 0){
+synth.triggerRelease(notes, now + 4);
+    //for i in note:
+    //  moveCursor()
+    //  playNote()
 
-        // trigger the attack immediately
-        synth.triggerAttack(getNoteFrequency(ipf[i].note + 12), now)
-        // wait one second before triggering the release
-        synth.triggerRelease(now + ipf[i].duration)
-        // Do stuff
-    }
-    console.log(ipf[i])
-
-    drawCursor(context, i)
-    playCurrentNote(context, i);
-
-    // Sleep
-    await sleep(ipf[i].duration)
-
-    // Repeat
-    nonPeriodicTimer(ipf, ++i, context);
 }
-
 
 function periodicTimer(context){
-
-    const currentMeasure = context.osmd.graphic.measureList[context.currentMeasure]
+    // metronome.Tick()
+    const currentMeasure = context.currentMeasure;
+    playMeasure()
     console.log(context.currentMeasure++)
 
 }
 
 function startPeriodicTimer(interval, context){
+    if ( context.lastIndex ==  -1){
+        playAnacrusis()
+    }
     return setInterval(periodicTimer, interval, context)
 }
 
