@@ -2,19 +2,24 @@ appContext = ApplicationContext;
 
 // MEMO: Add option to delay dacapo by one invisible measure
 
+// Get ToneJS compliant note strings
 function getToneName(semitone) {
+    if (semitone < 12) return
     const N = ["C", "D", "E", "F", "G", "A", "B", "C"];
-    semitone -= 12;
-    const octave = Math.floor(semitone / 12);
+    const octave = Math.floor(semitone / 12) - 1;
+    const semitone12 = semitone % 12;
 
-    /* --------------------------- */
-    // THIS DOES NOT WORK
-    // for example semitone(F#) % 2 == 0
-    const sharp = (semitone % 2 == 0) ? "" : "#";
-    const note = (N[Math.floor((semitone % 12) / 2)]);
+    let enableSharp = ""
+    // Check if note is to be played sharpened
+    if ( (semitone12 % 2 == 1) ^ (semitone12 > 4) ) enableSharp = false
+    else                                            enableSharp = true
+
+    const sharp = enableSharp ? "" : "#";
+    const note = (N[Math.round(semitone12 / 2)]);
     /* --------------------------- */
     return `${note}${sharp}${octave}`;
 }
+
 const startPauseButton = document.getElementById("control-play-pause");
 const restartButton    = document.getElementById("control-play-restart");
 const cursorElement    = document.getElementById("playback-cursor");
