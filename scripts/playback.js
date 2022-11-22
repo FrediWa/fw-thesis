@@ -1,5 +1,3 @@
-appContext = ApplicationContext;
-
 // MEMO: Add option to delay dacapo by one invisible measure
 
 // Get ToneJS compliant note strings
@@ -9,13 +7,12 @@ function getToneName(semitone) {
     const octave = Math.floor(semitone / 12) - 1;
     const semitone12 = semitone % 12;
 
-    let enableSharp = ""
     // Check if note is to be played sharpened
     if ( (semitone12 % 2 == 1) ^ (semitone12 > 4) ) enableSharp = false
     else                                            enableSharp = true
 
     const sharp = enableSharp ? "" : "#";
-    const note = (N[Math.round(semitone12 / 2)]);
+    const note = N[Math.round(semitone12 / 2)];
     /* --------------------------- */
     return `${note}${sharp}${octave}`;
 }
@@ -37,35 +34,49 @@ function moveCursorToMeasure(cursor, measureIndex) {
     cursor.reset()
     while ( cursor.iterstor.currentMeasureIndex != measureIndex ) cursor.next()
 }
-
-function playMeasure(context, measureIndex, tempo){
+function playMeasure(context, measureIndex){
     const synth = new Tone.PolySynth(Tone.Synth).toDestination();
     const now = Tone.now()
     const notes = context.ipf.measures[measureIndex].notes;
+    console.log("Measure index:", measureIndex)
     for( let i = 0; i < notes.length; i++){
-        synth.triggerAttack(notes[i].note, now + notes[i].offset);
-        synth.triggerRelease(notes[i].note, now + notes[i].offset + notes[i].duration);
+        console.log("NOTES I",notes[i])
+        if(notes[i].quiet) continue;
+        const toneName = getToneName(notes[i].note)
+        console.log(toneName)
+        synth.triggerAttack(toneName, now + notes[i].offset);
+        synth.triggerRelease(toneName, now + notes[i].offset + notes[i].duration);
     }
+}
 
-synth.triggerRelease(notes, now + 4);
-    //for i in note:
-    //  moveCursor()
-    //  playNote()
-
+function playAnacrusis(context, measureLengthInSeconds){
+    console.log(context.ipf.startAnacrusis)
+    if (!context.ipf.startAnacrusis)
+        return;
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    const now = Tone.now()
+    const notes = context.ipf.measures[0].notes;
+    const anacrusisLengthInSeconds = notes.reduce((sum, a) => sum + a.duration, 0);
+    const startOffset = measureLengthInSeconds - anacrusisLengthInSeconds;
+    console.log("MITÄ VITTUA", measureLengthInSeconds, anacrusisLengthInSeconds, startOffset)
+    for( let i = 0; i < notes.length; i++){
+        const toneName = getToneName(notes[i].note)
+        console.log(toneName)
+        synth.triggerAttack(toneName, now + startOffset + notes[i].offset);
+        synth.triggerRelease(toneName, now + startOffset + notes[i].offset + notes[i].duration);
+    }
 }
 
 function periodicTimer(context){
     // metronome.Tick()
-    const currentMeasure = context.currentMeasure;
-    playMeasure()
-    console.log(context.currentMeasure++)
-
+    const currentMeasure = context.ipf.playbackMap[context.currentMeasure];
+    playMeasure(context, currentMeasure);
+    console.log(context.currentMeasure);
+    context.currentMeasure++;
 }
 
 function startPeriodicTimer(interval, context){
-    if ( context.lastIndex ==  -1){
-        playAnacrusis()
-    }
+    context.currentMeasure = 0 + context.ipf.startAnacrusis;
     return setInterval(periodicTimer, interval, context)
 }
 
@@ -77,9 +88,16 @@ function pausePlay(context){
 async function play(ipf, start, context){
     disableInput(restartButton)
     context.pause = false;
+    const secondMeasure = context.ipf.measures[1]
+    const measureLengthInSeconds = secondMeasure.notes.reduce((sum, a) => sum + a.duration, 0);
+    console.log(measureLengthInSeconds)
 
-    //return await nonPeriodicTimer(ipf, start, context)
-    startPeriodicTimer(1000, context)
+    if ( context.ipf.startAnacrusis){
+        playAnacrusis(context, measureLengthInSeconds)
+        context.currentMeasure = 1;
+    }
+
+    startPeriodicTimer(measureLengthInSeconds * 1000, context)
 }
 
 function disableInput(element, useId=false){
@@ -99,17 +117,16 @@ function enableInput(element, useId=false){
 
 startPauseButton.addEventListener('change', async function ( e ) {
     const state = startPauseButton.checked
+    console.log(state)
     if ( state ) {
         await Tone.start()
-        //await play(appContext.ipf, appContext.lastIndex + 1, appContext)
-        startPeriodicTimer(1000, appContext)
+        play(ApplicationContext.ipf, 1000, ApplicationContext)
     } else if ( !state ){
-        pausePlay(appContext)
+        pausePlay(ApplicationContext)
     }
 });
 
 restartButton.addEventListener("click", function (){
     console.log("clicke")
-    appContext.lastIndex = -1;
-    // drawCursor(appContext.drawnNotes[0])
-})
+    ApplicationContext.lastIndex = -1;
+});

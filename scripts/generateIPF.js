@@ -12,7 +12,8 @@ function generateIPF(context){
 
 
     const repeatMap = [];
-    const IPF = {"repeatMap": [], "measures":[], "dc": false, "startAnacrusis": false};
+    const measureIndeces = [];
+    const IPF = {"playbackMap": [], "measures":[], "dc": false, "startAnacrusis": false};
     const sheetOsmd = context.osmd
     const playbackOsmd = context.playbackOsmd;
     const playbackMeasures = playbackOsmd.graphic.measureList;
@@ -62,11 +63,11 @@ function generateIPF(context){
         }
 
 
-    }
 
-    // Handle Da Capo and similar instructions
-    const repeatTypes = [
-        4, // DC
+    }
+        // Handle Da Capo and similar instructions
+        const repeatTypes = [
+            4, // DC
         9, // DC AF
         10 // DS AC
     ]; // List of enums according to OSMD's RepetitionInstructions.ts
@@ -74,6 +75,41 @@ function generateIPF(context){
     IPF.dc = repeatTypes.includes(lastMeasureRepetitionInstructions.type);
 
     // Add repeat map to IPF
+    // IPF.repeatMap = repeatMap
+
+    // Generate playbackMap from repeat information
+
+    const FLAT_DEPTH = 10;
+    for(let i = 0; i < IPF.measures.length; i++) {
+        measureIndeces[i] = i;
+    }
+    let playbackMap = measureIndeces.slice();
+    let totalShift = 0;
+    const sectionRepeats = [];
+    for(let i = 0; i < repeatMap.length; i++) {
+        console.log(repeatMap[i])
+        if(repeatMap[i] != undefined){
+            const repeatedSection = measureIndeces.slice(repeatMap[i][0], 1 + repeatMap[i][1]);
+            console.log("prkl", repeatedSection);
+            const insertStart = repeatMap[i][1] + 1;
+            const insertEnd = insertStart + repeatedSection.length;
+            console.log("Slice 0 to insert start", ...playbackMap.slice(0, insertStart))
+            playbackMap = [...playbackMap.slice(0, insertStart + totalShift), ...repeatedSection, ...playbackMap.slice(insertStart + totalShift)]
+            console.log("öjhagsefui", playbackMap)
+            totalShift += repeatedSection.length
+
+            // Get section to repeat
+            // const repeatedSection = measureIndeces.slice(repeatMap[i][0], 1 + repeatMap[i][1]);
+            // Get index of insertion
+            // const insertIndex = 1 + repeatMap[i][1];
+
+
+            // sectionRepeats.push(repeatedSection)
+        }
+    }
+    console.log(sectionRepeats)
+
+    IPF.playbackMap = playbackMap
     IPF.repeatMap = repeatMap
 
     // Based on
@@ -100,18 +136,23 @@ function generateIPF(context){
                     previousMeasureNumber = note.sourceMeasure.measureNumber;
                     noteOffset = 0;
                 }
-                // Skip rests and muted notes
+
                 const currentMeasureDuration = note.sourceMeasure.duration;
                 const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
                 const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
 
+                // Note if the first measure is anacrusis
+                if(anacrusis && note.sourceMeasure.measureNumber == 0)
+                    IPF.startAnacrusis = true;
+
                 // Skip anacrusis if it isn't the first measure
                 if ( note != null && (!anacrusis || (anacrusis && note.sourceMeasure.measureNumber == 0))) {
-                    IPF.measures[note.sourceMeasure.measureNumber].notes.push({
+                    const measureIndex = note.sourceMeasure.measureListIndex
+                    IPF.measures[measureIndex].notes.push({
                         "note": note.halfTone + 12,
                         "duration": note.length.realValue * 3,
                         "tempo": note.sourceMeasure.tempoInBPM,
-                        "slur": note.slurs.length !== 0,
+                        "quiet": ((note.slurs.length !== 0) && IPF.measures[measureIndex-1].notes.slur === true) || note.isRest(),
                         "offset": noteOffset
                     })
                 }
