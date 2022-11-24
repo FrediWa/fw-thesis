@@ -1,7 +1,7 @@
 // MEMO: Add option to delay dacapo by one invisible measure
 
 // Get ToneJS compliant note strings
-function getToneName(semitone) {
+function getToneName(semitone, keySignature) {
     if (semitone < 12) return
     const N = ["C", "D", "E", "F", "G", "A", "B", "C"];
     const octave = Math.floor(semitone / 12) - 1;
@@ -32,14 +32,19 @@ function moveCursor(cursor, steps) {
 
 function moveCursorToMeasure(cursor, measureIndex) {
     cursor.reset()
-    while ( cursor.iterstor.currentMeasureIndex != measureIndex ) cursor.next()
+    while ( cursor.iterator.currentMeasureIndex != measureIndex ) cursor.next()
 }
 function playMeasure(context, measureIndex){
+    console.log(context.playbackOsmd.cursor)
+    const cursor = context.playbackOsmd.cursor;
+    cursor.show()
+    moveCursorToMeasure(cursor, measureIndex);
     const synth = new Tone.PolySynth(Tone.Synth).toDestination();
     const now = Tone.now()
     const notes = context.ipf.measures[measureIndex].notes;
     console.log("Measure index:", measureIndex)
     for( let i = 0; i < notes.length; i++){
+        cursor.next();
         console.log("NOTES I",notes[i])
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
@@ -49,16 +54,16 @@ function playMeasure(context, measureIndex){
     }
 }
 
-function playAnacrusis(context, measureLengthInSeconds){
-    console.log(context.ipf.startAnacrusis)
+function playFirstAnacrusis(context, measureLengthInSeconds){
     if (!context.ipf.startAnacrusis)
         return;
     const synth = new Tone.PolySynth(Tone.Synth).toDestination();
     const now = Tone.now()
+
     const notes = context.ipf.measures[0].notes;
     const anacrusisLengthInSeconds = notes.reduce((sum, a) => sum + a.duration, 0);
     const startOffset = measureLengthInSeconds - anacrusisLengthInSeconds;
-    console.log("MITÄ VITTUA", measureLengthInSeconds, anacrusisLengthInSeconds, startOffset)
+
     for( let i = 0; i < notes.length; i++){
         const toneName = getToneName(notes[i].note)
         console.log(toneName)
@@ -68,16 +73,23 @@ function playAnacrusis(context, measureLengthInSeconds){
 }
 
 function periodicTimer(context){
-    // metronome.Tick()
-    const currentMeasure = context.ipf.playbackMap[context.currentMeasure];
-    playMeasure(context, currentMeasure);
-    console.log(context.currentMeasure);
-    context.currentMeasure++;
+    const playIndex = context.ipf.playbackMap[context.playbackIndex];
+    playMeasure(context, playIndex);
+    console.log(context.playIndex);
+    context.playbackIndex++;
 }
 
 function startPeriodicTimer(interval, context){
-    context.currentMeasure = 0 + context.ipf.startAnacrusis;
-    return setInterval(periodicTimer, interval, context)
+    // Boolean trickery, if first measure is anacrusis => true = 1 => starting index = 1
+    context.playbackIndex = 0 + context.ipf.startAnacrusis;
+    const timer =  setInterval(() => {
+        if(context.playbackIndex == context.ipf.playbackMap.length - 1){
+            console.log("Stop")
+            clearInterval(timer)
+        }
+        periodicTimer(context);
+
+    }, interval)
 }
 
 function pausePlay(context){
@@ -93,11 +105,11 @@ async function play(ipf, start, context){
     console.log(measureLengthInSeconds)
 
     if ( context.ipf.startAnacrusis){
-        playAnacrusis(context, measureLengthInSeconds)
-        context.currentMeasure = 1;
+        playFirstAnacrusis(context, measureLengthInSeconds)
+        context.playbackIndex = 1;
     }
 
-    startPeriodicTimer(measureLengthInSeconds * 1000, context)
+    context.currentPlayer = startPeriodicTimer(measureLengthInSeconds * 1000, context)
 }
 
 function disableInput(element, useId=false){

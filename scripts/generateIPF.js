@@ -9,11 +9,8 @@ function isAnacrusis(timeSignature, measureDuration) {
 
 function generateIPF(context){
 
-
-
+    const IPF = {"playbackMap": [], "measures":[], "startAnacrusis": false};
     const repeatMap = [];
-    const measureIndeces = [];
-    const IPF = {"playbackMap": [], "measures":[], "dc": false, "startAnacrusis": false};
     const sheetOsmd = context.osmd
     const playbackOsmd = context.playbackOsmd;
     const playbackMeasures = playbackOsmd.graphic.measureList;
@@ -26,6 +23,8 @@ function generateIPF(context){
         console.error("Graphic and playback length mismatch");
         return undefined;
     }
+
+    /* ---------- Extract measure and repeat information ---------- */
 
     // Generate repeat map and insert measure info into object
     let repeatStart = 0;
@@ -68,49 +67,54 @@ function generateIPF(context){
         // Handle Da Capo and similar instructions
         const repeatTypes = [
             4, // DC
-        9, // DC AF
-        10 // DS AC
+            9, // DC AF
+            10 // DS AC
     ]; // List of enums according to OSMD's RepetitionInstructions.ts
     const lastMeasureRepetitionInstructions = context.playbackOsmd.sheet.sourceMeasures.slice(-1)[0].lastRepetitionInstructions[0];
-    IPF.dc = repeatTypes.includes(lastMeasureRepetitionInstructions.type);
+    const dc = repeatTypes.includes(lastMeasureRepetitionInstructions.type);
 
-    // Add repeat map to IPF
-    // IPF.repeatMap = repeatMap
+    /* ---------- Construct playbackMap ---------- */
 
-    // Generate playbackMap from repeat information
-
-    const FLAT_DEPTH = 10;
+    const measureIndeces = [];
+    const sectionRepeats = [];
     for(let i = 0; i < IPF.measures.length; i++) {
         measureIndeces[i] = i;
     }
     let playbackMap = measureIndeces.slice();
+    // Keep track of insertion index as not to overwrite existing information
     let totalShift = 0;
-    const sectionRepeats = [];
     for(let i = 0; i < repeatMap.length; i++) {
-        console.log(repeatMap[i])
-        if(repeatMap[i] != undefined){
-            const repeatedSection = measureIndeces.slice(repeatMap[i][0], 1 + repeatMap[i][1]);
-            console.log("prkl", repeatedSection);
-            const insertStart = repeatMap[i][1] + 1;
-            const insertEnd = insertStart + repeatedSection.length;
-            console.log("Slice 0 to insert start", ...playbackMap.slice(0, insertStart))
-            playbackMap = [...playbackMap.slice(0, insertStart + totalShift), ...repeatedSection, ...playbackMap.slice(insertStart + totalShift)]
-            console.log("öjhagsefui", playbackMap)
+        const repeatIterator = repeatMap[i];
+        if(repeatIterator != undefined){
+            // Get measures to repeat
+            const repeatedSection = measureIndeces.slice(repeatIterator[0], repeatIterator[1] + 1);
+            const insertionIndex = repeatIterator[1] + 1;
+            const insertEnd = insertionIndex + repeatedSection.length;
+
+            console.log("Repeated section", repeatedSection);
+            console.log("Slice 0 to insert start", ...playbackMap.slice(0, insertionIndex))
+
+            // Construct a playback map by appending it to the middle of itself at certain positions
+            playbackMap = [...playbackMap.slice(0, insertionIndex + totalShift),   // Everything up to insertion index
+                           ...repeatedSection,                                  // New instructions
+                           ...playbackMap.slice(insertionIndex + totalShift)       // The rest
+            ]
+
+            // Increment shift
             totalShift += repeatedSection.length
-
-            // Get section to repeat
-            // const repeatedSection = measureIndeces.slice(repeatMap[i][0], 1 + repeatMap[i][1]);
-            // Get index of insertion
-            // const insertIndex = 1 + repeatMap[i][1];
-
-
-            // sectionRepeats.push(repeatedSection)
         }
     }
+
+    // Duplicate playbackMap in case of Da Capo
+    if(dc)
+        playbackMap = [...playbackMap, ...playbackMap]
+    console.log("Completed playback map", playbackMap)
     console.log(sectionRepeats)
 
+    // Append playbackMap to IPF
     IPF.playbackMap = playbackMap
-    IPF.repeatMap = repeatMap
+
+    /* ---------- Extract note information ---------- */
 
     // Based on
     // https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/wiki/Tutorial:-Extracting-note-timing-for-playing
@@ -124,22 +128,20 @@ function generateIPF(context){
     // Iterate over sheet
     while ( !iterator.EndReached ) {
         const voices = iterator.CurrentVoiceEntries;
-        // console.log("voices", voices)
 
         for (let i = 0; i < voices.length; i++) {
             const v = voices[i];
-            // console.log("v", v)
             const notes = v.Notes;
             for (let j = 0; j < notes.length; j++) {
                 const note = notes[j];
+                const currentMeasureDuration = note.sourceMeasure.duration;
+                const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
+                const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
+
                 if(note.sourceMeasure.measureNumber != previousMeasureNumber){
                     previousMeasureNumber = note.sourceMeasure.measureNumber;
                     noteOffset = 0;
                 }
-
-                const currentMeasureDuration = note.sourceMeasure.duration;
-                const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
-                const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
 
                 // Note if the first measure is anacrusis
                 if(anacrusis && note.sourceMeasure.measureNumber == 0)
@@ -148,6 +150,7 @@ function generateIPF(context){
                 // Skip anacrusis if it isn't the first measure
                 if ( note != null && (!anacrusis || (anacrusis && note.sourceMeasure.measureNumber == 0))) {
                     const measureIndex = note.sourceMeasure.measureListIndex
+                    console.log("Note", note)
                     IPF.measures[measureIndex].notes.push({
                         "note": note.halfTone + 12,
                         "duration": note.length.realValue * 3,

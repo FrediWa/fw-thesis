@@ -8,6 +8,7 @@ function loadPlayback(trackName, context){
   .load(trackName)
   .then(function(){
     osmd.render();
+    generateIPF(context)
   })
 }
 

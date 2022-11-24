@@ -8,6 +8,9 @@ function createDropdownItem(label, value) {
 }
 
 function populateSheetAndPlayback(value){
+    // Sheet is what is shown
+    // Playback is what is played
+
     // Get handles for both list elements
     const playbackDropdownElement = document.getElementById("playback-selection")
     const sheetDropdownElement = document.getElementById("sheet-selection")
@@ -28,7 +31,6 @@ function populateSheetAndPlayback(value){
             element.url
         ))
     });
-console.log(tracks)
     loadSheetMusic(tracks[0].url, ApplicationContext)
     loadPlayback(tracks[0].url, ApplicationContext)
 
@@ -62,18 +64,15 @@ document.getElementById("sheet-selection").addEventListener("change", () => {
 
 // Change playback track
 document.getElementById("playback-selection").addEventListener("change", () => {
-    // ApplicationContext.playbackOsmd =
+    loadPlayback(document.getElementById("playback-selection").value, ApplicationContext)
 });
 
 // Fetch JSON and populate collections dropdown
-fetch("../exercises/exercises.json")
-  .then((response) => response.json())
-  .then((data) => {
+fetch("../exercises/exercises.json").then((response) => response.json()).then((data) => {
     populateCollections(data);
     ApplicationContext.data = data;
     // Set default
     const DEFAULT_COLLECTION = 0
     document.getElementById('collection-selection').value = DEFAULT_COLLECTION;
     populateSheetAndPlayback(DEFAULT_COLLECTION)
-
-  });
+});
