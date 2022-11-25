@@ -17,8 +17,7 @@ function generateIPF(context){
     const sheetMeasures = sheetOsmd.graphic.measureList;
 
     // Assert that both OSMD object are atleast the same length
-    // TODO: Fix multirest
-    const enableLengthAssertion = false;
+    const enableLengthAssertion = true;
     if ( playbackMeasures.length !== sheetMeasures.length  && enableLengthAssertion) {
         console.error("Graphic and playback length mismatch");
         return undefined;
@@ -71,7 +70,7 @@ function generateIPF(context){
             10 // DS AC
     ]; // List of enums according to OSMD's RepetitionInstructions.ts
     const lastMeasureRepetitionInstructions = context.playbackOsmd.sheet.sourceMeasures.slice(-1)[0].lastRepetitionInstructions[0];
-    const dc = repeatTypes.includes(lastMeasureRepetitionInstructions.type);
+    const dc = repeatTypes.includes(lastMeasureRepetitionInstructions?.type);
 
     /* ---------- Construct playbackMap ---------- */
 
@@ -88,16 +87,15 @@ function generateIPF(context){
         if(repeatIterator != undefined){
             // Get measures to repeat
             const repeatedSection = measureIndeces.slice(repeatIterator[0], repeatIterator[1] + 1);
-            const insertionIndex = repeatIterator[1] + 1;
-            const insertEnd = insertionIndex + repeatedSection.length;
+            const insertionIndex = repeatIterator[1] + 1 + totalShift;
 
             console.log("Repeated section", repeatedSection);
             console.log("Slice 0 to insert start", ...playbackMap.slice(0, insertionIndex))
 
             // Construct a playback map by appending it to the middle of itself at certain positions
-            playbackMap = [...playbackMap.slice(0, insertionIndex + totalShift),   // Everything up to insertion index
-                           ...repeatedSection,                                  // New instructions
-                           ...playbackMap.slice(insertionIndex + totalShift)       // The rest
+            playbackMap = [...playbackMap.slice(0, insertionIndex),   // Everything up to insertion index
+                           ...repeatedSection,                                     // New instructions
+                           ...playbackMap.slice(insertionIndex)       // The rest
             ]
 
             // Increment shift
@@ -108,6 +106,7 @@ function generateIPF(context){
     // Duplicate playbackMap in case of Da Capo
     if(dc)
         playbackMap = [...playbackMap, ...playbackMap]
+
     console.log("Completed playback map", playbackMap)
     console.log(sectionRepeats)
 
@@ -150,7 +149,7 @@ function generateIPF(context){
                 // Skip anacrusis if it isn't the first measure
                 if ( note != null && (!anacrusis || (anacrusis && note.sourceMeasure.measureNumber == 0))) {
                     const measureIndex = note.sourceMeasure.measureListIndex
-                    console.log("Note", note)
+                    // console.log("Note", note)
                     IPF.measures[measureIndex].notes.push({
                         "note": note.halfTone + 12,
                         "duration": note.length.realValue * 3,

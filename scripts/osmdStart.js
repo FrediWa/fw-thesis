@@ -3,6 +3,7 @@ function loadPlayback(trackName, context){
   osmd.setOptions({
     backend: "svg",
     drawTitle: false,
+    autoGenerateMutipleRestMeasuresFromRestMeasures: false,
   });
   osmd
   .load(trackName)
@@ -20,6 +21,8 @@ function loadSheetMusic(trackName, context){
   osmd.setOptions({
     backend: "svg",
     drawTitle: false,
+    followCursor: true,
+    autoGenerateMutipleRestMeasuresFromRestMeasures: false,
   });
   osmd
   .load(trackName)
