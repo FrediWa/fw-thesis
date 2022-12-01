@@ -19,56 +19,47 @@ function getToneName(semitone, keySignature) {
 
 const startPauseButton = document.getElementById("control-play-pause");
 const restartButton    = document.getElementById("control-play-restart");
+const cursorButton     = document.getElementById("control-cursor-show");
 const cursorElement    = document.getElementById("playback-cursor");
-
-const synth = new Tone.Synth().toDestination();
+const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+// const synth = new Tone.Synth().toDestination();
 
 let timer = 0;
 
 function moveCursor(cursor, steps) {
-    cursor.show();
+    // cursor.show();
     for ( let i = 0; i < steps; i++ ) cursor.next();
 }
 
 function moveCursorToMeasure(cursor, measureIndex) {
     cursor.reset()
-    while ( cursor.iterator.currentMeasureIndex != measureIndex ) cursor.next()
+    // cursor.show()
+    while ( cursor.iterator.currentMeasureIndex <= measureIndex ) cursor.next()
 }
 function playMeasure(context, measureIndex){
     console.log(context.playbackOsmd.cursor)
-    const cursor = context.playbackOsmd.cursor;
-    cursor.show()
-    moveCursorToMeasure(cursor, measureIndex);
-    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    const cursor = context.osmd.cursor;
+    if(context.showCursor)
+        cursor.show()
+    moveCursorToMeasure(cursor, measureIndex - 1);
     const now = Tone.now()
+    // Shitty metronome
+    synth.triggerAttackRelease("C7", now, 0.01)
     const notes = context.ipf.measures[measureIndex].notes;
     console.log("Measure index:", measureIndex)
     for( let i = 0; i < notes.length; i++){
-        cursor.next();
+        // Stop ASAP if pause
+        // if(context.pause)
+        //     return
+
         console.log("NOTES I",notes[i])
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
+        const noteDuration = notes[i].duration * 3
+        const noteOffset = notes[i].offset * 3
         console.log(toneName)
-        synth.triggerAttack(toneName, now + notes[i].offset);
-        synth.triggerRelease(toneName, now + notes[i].offset + notes[i].duration);
-    }
-}
-
-function playFirstAnacrusis(context, measureLengthInSeconds){
-    if (!context.ipf.startAnacrusis)
-        return;
-    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
-    const now = Tone.now()
-
-    const notes = context.ipf.measures[0].notes;
-    const anacrusisLengthInSeconds = notes.reduce((sum, a) => sum + a.duration, 0);
-    const startOffset = measureLengthInSeconds - anacrusisLengthInSeconds;
-
-    for( let i = 0; i < notes.length; i++){
-        const toneName = getToneName(notes[i].note)
-        console.log(toneName)
-        synth.triggerAttack(toneName, now + startOffset + notes[i].offset);
-        synth.triggerRelease(toneName, now + startOffset + notes[i].offset + notes[i].duration);
+        synth.triggerAttack( toneName, now + noteOffset);
+        synth.triggerRelease(toneName, now + noteOffset + noteDuration);
     }
 }
 
@@ -80,13 +71,13 @@ function periodicTimer(context){
 }
 
 function startPeriodicTimer(interval, context){
-    // Boolean trickery, if first measure is anacrusis => true = 1 => starting index = 1
-    context.playbackIndex = 0 + context.ipf.startAnacrusis;
+    context.playbackIndex = 0
     const timer =  setInterval(() => {
-        if(context.playbackIndex == context.ipf.playbackMap.length - 1){
+        if(context.playbackIndex == context.ipf.playbackMap.length - 1 || context.pause){
             console.log("Stop")
             clearInterval(timer)
         }
+        console.log(interval)
         periodicTimer(context);
 
     }, interval)
@@ -101,15 +92,15 @@ async function play(ipf, start, context){
     disableInput(restartButton)
     context.pause = false;
     const secondMeasure = context.ipf.measures[1]
-    const measureLengthInSeconds = secondMeasure.notes.reduce((sum, a) => sum + a.duration, 0);
-    console.log(measureLengthInSeconds)
+    const measureLength = secondMeasure.notes.reduce((sum, a) => sum + a.duration, 0);
+    console.log(measureLength)
 
     if ( context.ipf.startAnacrusis){
-        playFirstAnacrusis(context, measureLengthInSeconds)
+        playFirstAnacrusis(context, measureLength)
         context.playbackIndex = 1;
     }
 
-    context.currentPlayer = startPeriodicTimer(measureLengthInSeconds * 1000, context)
+    context.currentPlayer = startPeriodicTimer(measureLength * 1000 * 3, context)
 }
 
 function disableInput(element, useId=false){
@@ -137,6 +128,13 @@ startPauseButton.addEventListener('change', async function ( e ) {
         pausePlay(ApplicationContext)
     }
 });
+
+cursorButton.addEventListener('change', async function ( e ) {
+    const state = cursorButton.checked
+    ApplicationContext.showCursor = state
+});
+
+
 
 restartButton.addEventListener("click", function (){
     console.log("clicke")

@@ -6,7 +6,7 @@ const ApplicationContext = {
         currentMeasure: 0,
         appReady: false,
         pause: false,
-        lastIndex: -1,
+        lastIndex: 0,
         data: [],
         osmd: null,
         playbackOsmd: null,
@@ -14,4 +14,6 @@ const ApplicationContext = {
         nextPlaybackMeasure: -1,
         drawnNotes: [],
         metronome: false,
+        timer: null,
+        showCursor: true,
 }

@@ -123,6 +123,7 @@ function generateIPF(context){
     playbackOsmd.cursor.reset()
     const iterator = playbackOsmd.cursor.Iterator;
     let noteOffset = 0;
+    let anacrusisShift = 0;
     let previousMeasureNumber = 0;
     // Iterate over sheet
     while ( !iterator.EndReached ) {
@@ -131,34 +132,37 @@ function generateIPF(context){
         for (let i = 0; i < voices.length; i++) {
             const v = voices[i];
             const notes = v.Notes;
+            anacrusisShift = 0;
             for (let j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 const currentMeasureDuration = note.sourceMeasure.duration;
                 const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
                 const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
 
+                console.log("measure is anacrusis", anacrusis);
+
+                // Blend slurs in different measures
                 if(note.sourceMeasure.measureNumber != previousMeasureNumber){
                     previousMeasureNumber = note.sourceMeasure.measureNumber;
                     noteOffset = 0;
                 }
+                // Calculate anacrusis padding
+                if(anacrusis && i == 0)
+                    anacrusisShift = currentTimeSignature.realValue - currentMeasureDuration.realValue
 
-                // Note if the first measure is anacrusis
-                if(anacrusis && note.sourceMeasure.measureNumber == 0)
-                    IPF.startAnacrusis = true;
+                const measureIndex = note.sourceMeasure.measureListIndex
 
-                // Skip anacrusis if it isn't the first measure
-                if ( note != null && (!anacrusis || (anacrusis && note.sourceMeasure.measureNumber == 0))) {
-                    const measureIndex = note.sourceMeasure.measureListIndex
+                if ( note != null) {
                     // console.log("Note", note)
                     IPF.measures[measureIndex].notes.push({
                         "note": note.halfTone + 12,
-                        "duration": note.length.realValue * 3,
+                        "duration": note.length.realValue,
                         "tempo": note.sourceMeasure.tempoInBPM,
                         "quiet": ((note.slurs.length !== 0) && IPF.measures[measureIndex-1].notes.slur === true) || note.isRest(),
-                        "offset": noteOffset
+                        "offset": noteOffset + anacrusisShift
                     })
+                    noteOffset += note.length.realValue;
                 }
-                noteOffset += note.length.realValue * 3;
             }
         }
         iterator.moveToNext()
