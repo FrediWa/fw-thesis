@@ -37,36 +37,37 @@ function moveCursorToMeasure(cursor, measureIndex) {
     while ( cursor.iterator.currentMeasureIndex <= measureIndex ) cursor.next()
 }
 function playMeasure(context, measureIndex){
-    console.log(context.playbackOsmd.cursor)
+    ////console.log(context.playbackOsmd.cursor)
     const cursor = context.osmd.cursor;
-    if(context.showCursor)
-        cursor.show()
+
+    cursor.show()
     moveCursorToMeasure(cursor, measureIndex - 1);
     const now = Tone.now()
     // Shitty metronome
     synth.triggerAttackRelease("C7", now, 0.01)
     const notes = context.ipf.measures[measureIndex].notes;
-    console.log("Measure index:", measureIndex)
+    
+    let cumulativeOffset = 0
     for( let i = 0; i < notes.length; i++){
-        // Stop ASAP if pause
-        // if(context.pause)
-        //     return
-
-        console.log("NOTES I",notes[i])
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
         const noteDuration = notes[i].duration * 3
         const noteOffset = notes[i].offset * 3
-        console.log(toneName)
-        synth.triggerAttack( toneName, now + noteOffset);
-        synth.triggerRelease(toneName, now + noteOffset + noteDuration);
+        ////console.log(toneName)
+        //synth.triggerAttack( toneName, now + noteOffset);
+        //synth.triggerRelease(toneName, now + noteOffset + noteDuration);
+        setTimeout(() => {
+            synth.triggerAttackRelease(toneName, noteDuration, now+noteOffset); 
+            console.log("Next", i, cumulativeOffset, now)
+            cursor.next()
+        }, noteOffset + noteDuration);
     }
 }
 
 function periodicTimer(context){
     const playIndex = context.ipf.playbackMap[context.playbackIndex];
     playMeasure(context, playIndex);
-    console.log(context.playIndex);
+    ////console.log(context.playIndex);
     context.playbackIndex++;
 }
 
@@ -74,10 +75,10 @@ function startPeriodicTimer(interval, context){
     context.playbackIndex = 0
     const timer =  setInterval(() => {
         if(context.playbackIndex == context.ipf.playbackMap.length - 1 || context.pause){
-            console.log("Stop")
+            ////console.log("Stop")
             clearInterval(timer)
         }
-        console.log(interval)
+        ////console.log(interval)
         periodicTimer(context);
 
     }, interval)
@@ -93,7 +94,7 @@ async function play(ipf, start, context){
     context.pause = false;
     const secondMeasure = context.ipf.measures[1]
     const measureLength = secondMeasure.notes.reduce((sum, a) => sum + a.duration, 0);
-    console.log(measureLength)
+    ////console.log(measureLength)
 
     if ( context.ipf.startAnacrusis){
         playFirstAnacrusis(context, measureLength)
@@ -120,7 +121,7 @@ function enableInput(element, useId=false){
 
 startPauseButton.addEventListener('change', async function ( e ) {
     const state = startPauseButton.checked
-    console.log(state)
+    ////console.log(state)
     if ( state ) {
         await Tone.start()
         play(ApplicationContext.ipf, 1000, ApplicationContext)
@@ -131,12 +132,10 @@ startPauseButton.addEventListener('change', async function ( e ) {
 
 cursorButton.addEventListener('change', async function ( e ) {
     const state = cursorButton.checked
-    ApplicationContext.showCursor = state
+    document.getElementById("cursorImg-0").style.opacity = state ? "1" : "0";
 });
 
-
-
-restartButton.addEventListener("click", function (){
-    console.log("clicke")
+restartButton.addEventListener("click", function ( e ){
+    ////console.log("clicke")
     ApplicationContext.lastIndex = -1;
 });

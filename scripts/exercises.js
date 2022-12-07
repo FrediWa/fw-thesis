@@ -20,7 +20,6 @@ function populateSheetAndPlayback(value){
     sheetDropdownElement.innerHTML = ""
 
     const tracks = ApplicationContext.data.exerciseSrcURLList[value].tracks
-    console.log(tracks)
     tracks.forEach(element => {
         sheetDropdownElement.append(createDropdownItem(
             element.name,

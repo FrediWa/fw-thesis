@@ -16,7 +16,7 @@ function loadPlayback(trackName, context){
 function loadSheetMusic(trackName, context){
 
   const osmd = context.osmd;
-  console.log(context.osmd)
+  //console.log(context.osmd)
 
   osmd.setOptions({
     backend: "svg",

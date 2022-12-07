@@ -89,8 +89,8 @@ function generateIPF(context){
             const repeatedSection = measureIndeces.slice(repeatIterator[0], repeatIterator[1] + 1);
             const insertionIndex = repeatIterator[1] + 1 + totalShift;
 
-            console.log("Repeated section", repeatedSection);
-            console.log("Slice 0 to insert start", ...playbackMap.slice(0, insertionIndex))
+            //console.log("Repeated section", repeatedSection);
+            //console.log("Slice 0 to insert start", ...playbackMap.slice(0, insertionIndex))
 
             // Construct a playback map by appending it to the middle of itself at certain positions
             playbackMap = [...playbackMap.slice(0, insertionIndex),   // Everything up to insertion index
@@ -107,8 +107,8 @@ function generateIPF(context){
     if(dc)
         playbackMap = [...playbackMap, ...playbackMap]
 
-    console.log("Completed playback map", playbackMap)
-    console.log(sectionRepeats)
+    //console.log("Completed playback map", playbackMap)
+    //console.log(sectionRepeats)
 
     // Append playbackMap to IPF
     IPF.playbackMap = playbackMap
@@ -139,7 +139,7 @@ function generateIPF(context){
                 const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
                 const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
 
-                console.log("measure is anacrusis", anacrusis);
+                //console.log("measure is anacrusis", anacrusis);
 
                 // Blend slurs in different measures
                 if(note.sourceMeasure.measureNumber != previousMeasureNumber){
@@ -153,7 +153,7 @@ function generateIPF(context){
                 const measureIndex = note.sourceMeasure.measureListIndex
 
                 if ( note != null) {
-                    // console.log("Note", note)
+                    // //console.log("Note", note)
                     IPF.measures[measureIndex].notes.push({
                         "note": note.halfTone + 12,
                         "duration": note.length.realValue,
