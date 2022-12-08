@@ -1,6 +1,6 @@
 body   { display: block; width: 100%; height: 100vh; margin: 0; padding:0; overflow: hidden; }
 body   { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-header { display: block; width: 100%; min-height: 15vh; }
+header { display: block; width: 100%; }
 
 #load-overlay {
     position: absolute;
@@ -56,6 +56,7 @@ input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
 
 
 /* Track selection container*/
+#track-selection-section { margin-top: 100px; }
 
 #track-selection-container {
     width: 400px;
@@ -64,7 +65,7 @@ input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
     grid-template-columns: 50% 50%;
 }
 
-#track-selection-section label        { display: block; text-align: center; }
+#track-selection-section label        { display: block; text-align: center;}
 #track-collection-selection-container { width: 300px;   margin: 0 auto; }
 #track-selection-container > div      { text-align: center; }
 

@@ -17,3 +17,5 @@ const ApplicationContext = {
         timer: null,
         showCursor: true,
 }
+
+

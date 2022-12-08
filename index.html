@@ -41,8 +41,6 @@
         </section>
 
     </header>
-
-    <div id="playback-cursor"></div>
     <!-- Sheet music container -->
     <div id="osmd-container"></div>
     <!-- Null container for the OSMD only used for playback -->
@@ -77,6 +75,7 @@
 
             <input class="control-input"  type="checkbox" id="control-metronome" name="metronome" value="0">
             <label class="control-input"  for="control-metronome">Metronote</label><br>
+            <canvas id="oscilloscope"></canvas>
         </div>
     </div>
 
@@ -85,6 +84,7 @@
 
     <!-- App context -->
     <script src="scripts/init.js"></script>
+    <script src="scripts/fft/fft.js"></script>
 
     <!-- Script for IPF generation -->
     <script src="scripts/generateIPF.js"></script>

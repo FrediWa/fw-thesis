@@ -135,11 +135,11 @@ function generateIPF(context){
             anacrusisShift = 0;
             for (let j = 0; j < notes.length; j++) {
                 const note = notes[j];
+                console.log(note)
                 const currentMeasureDuration = note.sourceMeasure.duration;
                 const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
                 const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
 
-                //console.log("measure is anacrusis", anacrusis);
 
                 // Blend slurs in different measures
                 if(note.sourceMeasure.measureNumber != previousMeasureNumber){
