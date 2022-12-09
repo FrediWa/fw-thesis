@@ -1,83 +1,57 @@
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Visualizations_with_Web_Audio_API
-/*
-let dataArray = [];
-if(navigator.mediaDevices){
-    const canvas = document.getElementById("oscilloscope");
-    const canvasCtx = canvas.getContext("2d");
-    //navigator.mediaDevices.getUserMedia({ audio: {deviceId: 'default', kind: 'audiooutput'} })
-    .then(stream => {
-
-        // Create a new audio context
-    const audioCtx = new AudioContext();
-
-    // Create an analyser node
-    const analyser = audioCtx.createAnalyser();
-
-    const source = audioCtx.createMediaStreamSource(stream);
-    source.connect(analyser);
-
-    const bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-    analyser.getByteTimeDomainData(dataArray);
-
-    console.log(stream)
-
-    function draw() {
-        requestAnimationFrame(draw);
-
-        analyser.getByteTimeDomainData(dataArray);
-
-        canvasCtx.fillStyle = "rgb(200, 200, 200)";
-        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-        canvasCtx.lineWidth = 2;
-        canvasCtx.strokeStyle = "rgb(0, 0, 0)";
-
-        canvasCtx.beginPath();
-
-        const sliceWidth = (canvas.width * 1.0) / bufferLength;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = (v * canvas.height) / 2;
-
-          if (i === 0) {
-            canvasCtx.moveTo(x, y);
-          } else {
-            canvasCtx.lineTo(x, y);
-          }
-
-          x += sliceWidth;
-        }
-
-        canvasCtx.lineTo(canvas.width, canvas.height / 2);
-        canvasCtx.stroke();
-      }
-
-      draw();
-
-    });
-}
-*/
-
-
 
 // Init capturing
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    let pitch;
+    const audioContext = new AudioContext();
+    // Link to pretrained CREPE model
+    const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
+
+    function getPitch(error, frequency) {
+        if (error) {
+          console.error(error);
+        } else {
+          //console.log(frequency);
+          if (frequency) {
+
+            ApplicationContext.currentNPB.push(frequency)
+            // console.log(frequency)
+          }
+          pitch.getPitch(getPitch);
+        }
+      }
+    // When the model is loaded
+    function modelLoaded() {
+        console.log('Model Loaded!');
+        pitch.getPitch(getPitch);
+    };
+
+     // Constraints for user media devices
+    const constraints = {
+        audio:true,
+    };
+
     navigator.mediaDevices
-            .getUserMedia({ audio: true })
+        .getUserMedia(constraints)
 
-            // Success callback
-            .then((stream) => {
-                // Init media recorder
-                const mediaRecorder = new MediaRecorder(stream);
-            })
+        // Success callback
+        .then((stream) => {
+            // Init media recorder
+            pitch = ml5.pitchDetection(
+                model_url,
+                audioContext,
+                stream,
+                modelLoaded,
+            );
+            // while(true){
 
-            // Error callback
-            .catch((err) => {
-            console.error(`The following getUserMedia error occurred: ${err}`);
-            });
+
+            // }
+        })
+
+        // Error callback
+        .catch((err) => {
+        console.error(`The following getUserMedia error occurred: ${err}`);
+        });
 } else {
     console.log("getUserMedia not supported on your browser!");
 }

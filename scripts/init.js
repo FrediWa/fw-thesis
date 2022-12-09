@@ -16,6 +16,7 @@ const ApplicationContext = {
         metronome: false,
         timer: null,
         showCursor: true,
+        currentNPB: [],
 }
 
 

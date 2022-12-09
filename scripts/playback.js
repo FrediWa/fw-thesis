@@ -11,6 +11,12 @@ function getToneName(semitone, keySignature) {
     return `${note}${octave}`;
 }
 
+function approxFrequencyToMidi(frequency){
+    // Formula from https://newt.phys.unsw.edu.au/jw/notes.html
+    const approxMidi =  12*Math.log2(440) + 69
+    return(approxMidi);
+}
+
 // Element handles
 const startPauseButton = document.getElementById("control-play-pause");
 const restartButton    = document.getElementById("control-play-restart");
@@ -35,7 +41,6 @@ function moveCursorToMeasure(cursor, measureIndex) {
 
 }
 function playMeasure(context, measureIndex){
-    ////console.log(context.playbackOsmd.cursor)
     const cursor = context.osmd.cursor;
     const currentMeasure = context.ipf.measures[measureIndex]
     context.lastIndex = context.playbackIndex;
@@ -46,16 +51,13 @@ function playMeasure(context, measureIndex){
     if (context.metronome) synth.triggerAttackRelease("C7", now, 0.01)
     const notes = currentMeasure.notes;
 
-    let cumulativeOffset = 0
     for( let i = 0; i < notes.length; i++){
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
         const noteDuration = notes[i].duration * 3
         const noteOffset = notes[i].offset * 3
 
-        setTimeout(() => {
-            synth.triggerAttackRelease(toneName, noteDuration, now+noteOffset);
-        }, noteOffset + noteDuration);
+        synth.triggerAttackRelease(toneName, noteDuration, now+noteOffset);
     }
 
 }

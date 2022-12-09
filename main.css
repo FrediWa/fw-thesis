@@ -39,14 +39,6 @@ header { display: block; width: 100%; }
 .control-input    { cursor: pointer; }
 .control-inactive { cursor: not-allowed; opacity: 0.5; }
 
-#playback-cursor {
-    display: block;
-    position: absolute;
-    left: 24px; top: 11px;
-    width: 22px; height: 13px;
-    background-color: red;
-}
-
 #control-play-restart { border: 0; background-color: transparent; font-size: 1.1rem;}
 
 /* Play/Pause button state styles */
