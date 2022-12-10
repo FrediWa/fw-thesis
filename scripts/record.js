@@ -13,8 +13,9 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           //console.log(frequency);
           if (frequency) {
 
-            ApplicationContext.currentNPB.push(frequency)
-            // console.log(frequency)
+            ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
+            const approxMidi = approxFrequencyToMidi(frequency);
+            console.log(getToneName(approxMidi))
           }
           pitch.getPitch(getPitch);
         }

@@ -13,8 +13,8 @@ function getToneName(semitone, keySignature) {
 
 function approxFrequencyToMidi(frequency){
     // Formula from https://newt.phys.unsw.edu.au/jw/notes.html
-    const approxMidi =  12*Math.log2(440) + 69
-    return(approxMidi);
+    const approxMidi =  12*Math.log2(frequency/440) + 69
+    return(Math.round(approxMidi));
 }
 
 // Element handles

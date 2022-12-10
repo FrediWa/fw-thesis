@@ -21,7 +21,15 @@
             "collectionName": "Development Tests",
             "tracks": [
                 {"id": 20, "name": "Repeat Test", "url": "mxl/repeatTest.mxl"},
-                {"id": 21, "name": "Pause Test", "url": "mxl/pauseTest.mxl"}
+                {"id": 21, "name": "Pause Test", "url": "mxl/pauseTest.mxl"},
+                {"id": 22, "name": "Volta Test", "url": "mxl/Volta_test.mxl"}
+            ]
+        },
+        {
+            "collectionID": 3,
+            "collectionName": "Fridolins Dårskap TTBB",
+            "tracks": [
+                {"id": 30, "name": "Fridolins Dårskap T1", "url": "mxl/Fridolins_dårksap.mxl"}
             ]
         }
     ]
