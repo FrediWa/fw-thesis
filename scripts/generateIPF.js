@@ -136,6 +136,7 @@ function generateIPF(context){
             for (let j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 const currentMeasureDuration = note.sourceMeasure.duration;
+                console.log("C M D", currentMeasureDuration)
                 const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
                 const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
 

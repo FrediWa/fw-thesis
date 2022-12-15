@@ -50,12 +50,13 @@ function playMeasure(context, measureIndex){
     // Shitty metronome
     if (context.metronome) synth.triggerAttackRelease("C7", now, 0.01)
     const notes = currentMeasure.notes;
-
-    for( let i = 0; i < notes.length; i++){
+  //  const scalar = currentMeasure.tempo / currentMeasure.timeSignature.numerator / 60;
+    const scalar = 3;  
+  for( let i = 0; i < notes.length; i++){
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
-        const noteDuration = notes[i].duration * 3
-        const noteOffset = notes[i].offset * 3
+        const noteDuration = notes[i].duration * scalar
+        const noteOffset = notes[i].offset * scalar
 
         synth.triggerAttackRelease(toneName, noteDuration, now+noteOffset);
     }
@@ -80,10 +81,13 @@ function pausePlay(context){
 
 function startPeriodicTimer(interval, context){
     context.playbackIndex = context.lastIndex;
+    periodicTimer(context);
     const timer =  setInterval(() => {
         if(context.playbackIndex == context.ipf.playbackMap.length - 1 || context.pause){
             clearInterval(timer)
         }
+        
+        console.log("Timer")
         periodicTimer(context);
 
     }, interval)
@@ -92,10 +96,10 @@ function startPeriodicTimer(interval, context){
 async function play(ipf, start, context){
     disableInput(restartButton)
     context.pause = false;
-    const secondMeasure = context.ipf.measures[1]
-    const measureLength = secondMeasure.notes.reduce((sum, a) => sum + a.duration, 0);
-
-    context.currentPlayer = startPeriodicTimer(measureLength * 1000 * 3, context)
+    const firstMeasure = ipf.measures[0]
+    //const measureLength = secondMeasure.notes.reduce((sum, a) => sum + a.duration, 0);
+    const measureLengthInMS = firstMeasure.tempo / 60 * firstMeasure.timeSignature.numerator * 1000; 
+    context.currentPlayer = startPeriodicTimer(measureLengthInMS, context)
 }
 
 function disableInput(element, useId=false){
