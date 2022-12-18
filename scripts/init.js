@@ -5,7 +5,7 @@ const PATH = "./mxl/"
 const ApplicationContext = {
         currentMeasure: 0,
         appReady: false,
-        pause: false,
+        pause: true,
         lastIndex: 0,
         data: [],
         osmd: null,

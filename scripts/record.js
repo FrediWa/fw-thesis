@@ -10,12 +10,12 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         if (error) {
           console.error(error);
         } else {
-          //console.log(frequency);
-          if (frequency) {
+          if (frequency && !ApplicationContext.pause) {
 
             ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
             const approxMidi = approxFrequencyToMidi(frequency);
             console.log(getToneName(approxMidi))
+            console.log(ApplicationContext.playbackIndex)
           }
           pitch.getPitch(getPitch);
         }
@@ -43,10 +43,6 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 stream,
                 modelLoaded,
             );
-            // while(true){
-
-
-            // }
         })
 
         // Error callback

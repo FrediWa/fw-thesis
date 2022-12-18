@@ -22,7 +22,10 @@
             "tracks": [
                 {"id": 20, "name": "Repeat Test", "url": "mxl/repeatTest.mxl"},
                 {"id": 21, "name": "Pause Test", "url": "mxl/pauseTest.mxl"},
-                {"id": 22, "name": "Volta Test", "url": "mxl/Volta_test.mxl"}
+                {"id": 22, "name": "Volta Test", "url": "mxl/Volta_test.mxl"},
+                {"id": 23, "name": "Tempo Test 1", "url": "mxl/tempoTest1.mxl"},
+                {"id": 24, "name": "Tempo Test 2", "url": "mxl/tempoTest2.mxl"},
+                {"id": 25, "name": "Tempo Test 3", "url": "mxl/tempoTest3.mxl"}
             ]
         },
         {

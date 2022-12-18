@@ -13,7 +13,7 @@ function getToneName(semitone, keySignature) {
 
 function approxFrequencyToMidi(frequency){
     // Formula from https://newt.phys.unsw.edu.au/jw/notes.html
-    const approxMidi =  12*Math.log2(frequency/440) + 69
+    const approxMidi = 12*Math.log2(frequency/440) + 69
     return(Math.round(approxMidi));
 }
 
@@ -27,11 +27,18 @@ const cursorElement    = document.getElementById("playback-cursor");
 // Init synth
 const synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
-
-// let timer = 0;
+function calculateMSPB(measure){
+    const bpm = measure.tempo * measure.timeSignature.denominator / 4; 
+    const bps = bpm/60;
+    return (1 / bps);
+}
+function calculateMeasureLength(measure){
+    const bpm = measure.tempo * measure.timeSignature.denominator / 4; 
+    const bps = bpm / 60;
+    return measure.timeSignature.numerator / bps * 1000; 
+}
 
 function moveCursor(cursor, steps) {
-    // cursor.show();
     for ( let i = 0; i < steps; i++ ) cursor.next();
 }
 
@@ -42,7 +49,8 @@ function moveCursorToMeasure(cursor, measureIndex) {
 }
 function playMeasure(context, measureIndex){
     const cursor = context.osmd.cursor;
-    const currentMeasure = context.ipf.measures[measureIndex]
+    const currentMeasure = context.ipf.measures[measureIndex];
+    const measureLength = calculateMeasureLength(currentMeasure);
     context.lastIndex = context.playbackIndex;
     cursor.show()
     moveCursorToMeasure(cursor, measureIndex);
@@ -50,15 +58,14 @@ function playMeasure(context, measureIndex){
     // Shitty metronome
     if (context.metronome) synth.triggerAttackRelease("C7", now, 0.01)
     const notes = currentMeasure.notes;
-  //  const scalar = currentMeasure.tempo / currentMeasure.timeSignature.numerator / 60;
-    const scalar = 3;  
+    const scalar = calculateMSPB(currentMeasure);  
   for( let i = 0; i < notes.length; i++){
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
-        const noteDuration = notes[i].duration * scalar
-        const noteOffset = notes[i].offset * scalar
+        const noteDuration = notes[i].duration * currentMeasure.timeSignature.denominator * scalar
+        const noteOffset = notes[i].offset * currentMeasure.timeSignature.denominator * scalar
 
-        synth.triggerAttackRelease(toneName, noteDuration, now+noteOffset);
+        synth.triggerAttackRelease(toneName, noteDuration, now + noteOffset);
     }
 
 }
@@ -87,7 +94,6 @@ function startPeriodicTimer(interval, context){
             clearInterval(timer)
         }
         
-        console.log("Timer")
         periodicTimer(context);
 
     }, interval)
@@ -96,9 +102,8 @@ function startPeriodicTimer(interval, context){
 async function play(ipf, start, context){
     disableInput(restartButton)
     context.pause = false;
-    const firstMeasure = ipf.measures[0]
-    //const measureLength = secondMeasure.notes.reduce((sum, a) => sum + a.duration, 0);
-    const measureLengthInMS = firstMeasure.tempo / 60 * firstMeasure.timeSignature.numerator * 1000; 
+
+    const measureLengthInMS = calculateMeasureLength(ipf.measures[1])
     context.currentPlayer = startPeriodicTimer(measureLengthInMS, context)
 }
 
