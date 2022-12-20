@@ -46,6 +46,11 @@ input#control-play-pause                                  { display: none;  font
 input#control-play-pause:checked       ~ label i.fa-play  { display: none; }
 input#control-play-pause:not(:checked) ~ label i.fa-pause { display: none; }
 
+/* Play/Pause button state styles */
+input#control-test-mode                                  { display: none;  font-size: 1.1rem;}
+input#control-test-mode:checked       ~ label i.fa-play  { display: none; }
+input#control-test-mode:not(:checked) ~ label i.fa-stop { display: none; }
+
 
 /* Track selection container*/
 #track-selection-section { margin-top: 100px; }

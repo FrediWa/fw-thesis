@@ -10,7 +10,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         if (error) {
           console.error(error);
         } else {
-          if (frequency && !ApplicationContext.pause) {
+          if (frequency && !ApplicationContext.testMode) {
 
             ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
             const approxMidi = approxFrequencyToMidi(frequency);

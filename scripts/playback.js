@@ -19,6 +19,8 @@ function approxFrequencyToMidi(frequency){
 
 // Element handles
 const startPauseButton = document.getElementById("control-play-pause");
+const startTestButton = document.getElementById("control-test-mode");
+const startToneButton  = document.getElementById("control-start-tone");
 const restartButton    = document.getElementById("control-play-restart");
 const cursorButton     = document.getElementById("control-cursor-show");
 const metronomeButton  = document.getElementById("control-metronome");
@@ -28,14 +30,15 @@ const cursorElement    = document.getElementById("playback-cursor");
 const synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
 function calculateMSPB(measure){
-    const bpm = measure.tempo * measure.timeSignature.denominator / 4; 
+    const bpm = measure.tempo * measure.timeSignature.denominator / 4;
     const bps = bpm/60;
     return (1 / bps);
 }
+
 function calculateMeasureLength(measure){
-    const bpm = measure.tempo * measure.timeSignature.denominator / 4; 
+    const bpm = measure.tempo * measure.timeSignature.denominator / 4;
     const bps = bpm / 60;
-    return measure.timeSignature.numerator / bps * 1000; 
+    return measure.timeSignature.numerator / bps * 1000;
 }
 
 function moveCursor(cursor, steps) {
@@ -50,7 +53,6 @@ function moveCursorToMeasure(cursor, measureIndex) {
 function playMeasure(context, measureIndex){
     const cursor = context.osmd.cursor;
     const currentMeasure = context.ipf.measures[measureIndex];
-    const measureLength = calculateMeasureLength(currentMeasure);
     context.lastIndex = context.playbackIndex;
     cursor.show()
     moveCursorToMeasure(cursor, measureIndex);
@@ -58,12 +60,14 @@ function playMeasure(context, measureIndex){
     // Shitty metronome
     if (context.metronome) synth.triggerAttackRelease("C7", now, 0.01)
     const notes = currentMeasure.notes;
-    const scalar = calculateMSPB(currentMeasure);  
+
+    // Calculate how long a "beat" is in milliseconds
+    const scalar = currentMeasure.timeSignature.denominator * calculateMSPB(currentMeasure);
   for( let i = 0; i < notes.length; i++){
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
-        const noteDuration = notes[i].duration * currentMeasure.timeSignature.denominator * scalar
-        const noteOffset = notes[i].offset * currentMeasure.timeSignature.denominator * scalar
+        const noteDuration = notes[i].duration * scalar
+        const noteOffset   = notes[i].offset   * scalar
 
         synth.triggerAttackRelease(toneName, noteDuration, now + noteOffset);
     }
@@ -74,6 +78,10 @@ function periodicTimer(context){
     const playIndex = context.ipf.playbackMap[context.playbackIndex];
     playMeasure(context, playIndex);
     context.playbackIndex++;
+    if( !context.testMode ) {
+        context.playbackIndex = 0;
+        context.lastIndex = 0;
+    }
 }
 
 function restart(context){
@@ -81,6 +89,11 @@ function restart(context){
     context.lastIndex = 0;
 }
 
+function stopPlay(context){
+    context.pause     = true;  // Stop playback
+    context.testMode  = false; // Disable test mode
+    context.lastIndex = 0;     // Reset index
+}
 function pausePlay(context){
     context.pause = true;
     enableInput(restartButton)
@@ -89,11 +102,12 @@ function pausePlay(context){
 function startPeriodicTimer(interval, context){
     context.playbackIndex = context.lastIndex;
     periodicTimer(context);
+    console.log(context.playbackIndex)
     const timer =  setInterval(() => {
         if(context.playbackIndex == context.ipf.playbackMap.length - 1 || context.pause){
             clearInterval(timer)
         }
-        
+
         periodicTimer(context);
 
     }, interval)
@@ -132,6 +146,20 @@ startPauseButton.addEventListener('change', async function ( e ) {
     }
 });
 
+startTestButton.addEventListener('change', async function ( e ) {
+    const state = startTestButton.checked
+    if ( state ) {
+        await Tone.start()
+        ApplicationContext.testStartTimestamp = Date.now();
+        ApplicationContext.currentNPB         = [];
+        ApplicationContext.testMode           = true;
+        play(ApplicationContext.ipf, 1000, ApplicationContext)
+    } else if ( !state ){
+        stopPlay(ApplicationContext)
+        // getResults(ApplicationContext)
+    }
+});
+
 cursorButton.addEventListener('change', async function ( e ) {
     const state = cursorButton.checked
     document.getElementById("cursorImg-0").style.opacity = state ? "1" : "0";
@@ -145,3 +173,10 @@ metronomeButton.addEventListener("click", function ( e ){
     const state = metronomeButton.checked
     ApplicationContext.metronome = state;
 });
+
+startToneButton.addEventListener("click", function ( e ){
+    const startTone = ApplicationContext.ipf.measures[0].notes[0]
+    const toneName  = getToneName(startTone.note)
+    const now       = Tone.now()
+    synth.triggerAttackRelease(toneName, 0.5, now);
+})

@@ -75,15 +75,15 @@ function generateIPF(context){
     /* ---------- Construct playbackMap ---------- */
 
     const measureIndeces = [];
-    const sectionRepeats = [];
     for(let i = 0; i < IPF.measures.length; i++) {
         measureIndeces[i] = i;
     }
     let playbackMap = measureIndeces.slice();
-    // Keep track of insertion index as not to overwrite existing information
-    let totalShift = 0;
+    // Keep track of total shift not to overwrite existing information
+    let totalShift =
     for(let i = 0; i < repeatMap.length; i++) {
         const repeatIterator = repeatMap[i];
+        // Check if there are repeat instructions for the a measure
         if(repeatIterator != undefined){
             // Get measures to repeat
             const repeatedSection = measureIndeces.slice(repeatIterator[0], repeatIterator[1] + 1);
@@ -91,7 +91,7 @@ function generateIPF(context){
 
             // Construct a playback map by appending it to the middle of itself at certain positions
             playbackMap = [...playbackMap.slice(0, insertionIndex),   // Everything up to insertion index
-                           ...repeatedSection,                                     // New instructions
+                           ...repeatedSection,                        // New instructions
                            ...playbackMap.slice(insertionIndex)       // The rest
             ]
             // Increment shift
@@ -99,7 +99,7 @@ function generateIPF(context){
         }
     }
 
-    // Duplicate playbackMap in case of Da Capo
+    // Duplicate playbackMap once in case of Da Capo
     if(dc)
         playbackMap = [...playbackMap, ...playbackMap]
 
@@ -116,7 +116,7 @@ function generateIPF(context){
     playbackOsmd.cursor.reset()
     const iterator = playbackOsmd.cursor.Iterator;
     let noteOffset = 0;
-    let anacrusisShift = 0;
+    let anacrusisPadding = 0;
     let previousMeasureNumber = 0;
     // Iterate over sheet
     while ( !iterator.EndReached ) {
@@ -125,13 +125,13 @@ function generateIPF(context){
         for (let i = 0; i < voices.length; i++) {
             const v = voices[i];
             const notes = v.Notes;
-            anacrusisShift = 0;
+            // Reset anacrusis padding when entering a new measure
+            anacrusisPadding = 0;
             for (let j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 const currentMeasureDuration = note.sourceMeasure.duration;
                 const currentTimeSignature   = note.sourceMeasure.activeTimeSignature;
                 const anacrusis              = isAnacrusis(currentTimeSignature, currentMeasureDuration);
-
 
                 // Blend slurs in different measures
                 if(note.sourceMeasure.measureNumber != previousMeasureNumber){
@@ -140,7 +140,7 @@ function generateIPF(context){
                 }
                 // Calculate anacrusis padding
                 if(anacrusis && i == 0)
-                    anacrusisShift = currentTimeSignature.realValue - currentMeasureDuration.realValue
+                    anacrusisPadding = currentTimeSignature.realValue - currentMeasureDuration.realValue
 
                 const measureIndex = note.sourceMeasure.measureListIndex
 
@@ -150,7 +150,7 @@ function generateIPF(context){
                         "duration": note.length.realValue,
                         "tempo": note.sourceMeasure.tempoInBPM,
                         "quiet": ((note.slurs.length !== 0) && IPF.measures[measureIndex-1].notes.slur === true) || note.isRest(),
-                        "offset": noteOffset + anacrusisShift
+                        "offset": noteOffset + anacrusisPadding
                     })
                     noteOffset += note.length.realValue;
                 }
