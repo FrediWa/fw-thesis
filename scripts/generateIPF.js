@@ -80,7 +80,7 @@ function generateIPF(context){
     }
     let playbackMap = measureIndeces.slice();
     // Keep track of total shift not to overwrite existing information
-    let totalShift =
+    let totalShift = 0;
     for(let i = 0; i < repeatMap.length; i++) {
         const repeatIterator = repeatMap[i];
         // Check if there are repeat instructions for the a measure
