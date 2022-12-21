@@ -1,4 +1,5 @@
-// MEMO: Add option to delay dacapo by one invisible measure
+const startRecording = new CustomEvent("startRecording")
+const stopRecording = new CustomEvent("stopRecording")
 
 // Get ToneJS compliant note strings
 function getToneName(semitone, keySignature) {
@@ -13,13 +14,13 @@ function getToneName(semitone, keySignature) {
 
 function approxFrequencyToMidi(frequency){
     // Formula from https://newt.phys.unsw.edu.au/jw/notes.html
-    const approxMidi = 12*Math.log2(frequency/440) + 69
+    const approxMidi = 12 * Math.log2(frequency / 440) + 69
     return(Math.round(approxMidi));
 }
 
 // Element handles
 const startPauseButton = document.getElementById("control-play-pause");
-const startTestButton = document.getElementById("control-test-mode");
+const startTestButton  = document.getElementById("control-test-mode");
 const startToneButton  = document.getElementById("control-start-tone");
 const restartButton    = document.getElementById("control-play-restart");
 const cursorButton     = document.getElementById("control-cursor-show");
@@ -51,19 +52,22 @@ function moveCursorToMeasure(cursor, measureIndex) {
 
 }
 function playMeasure(context, measureIndex){
+    // Cancel playback asap if pause
+    if(context.pause) return;
+
     const cursor = context.osmd.cursor;
     const currentMeasure = context.ipf.measures[measureIndex];
-    context.lastIndex = context.playbackIndex;
+    const now = Tone.now()
     cursor.show()
     moveCursorToMeasure(cursor, measureIndex);
-    const now = Tone.now()
+
     // Shitty metronome
     if (context.metronome) synth.triggerAttackRelease("C7", now, 0.01)
     const notes = currentMeasure.notes;
 
     // Calculate how long a "beat" is in milliseconds
     const scalar = currentMeasure.timeSignature.denominator * calculateMSPB(currentMeasure);
-  for( let i = 0; i < notes.length; i++){
+    for( let i = 0; i < notes.length; i++){
         if(notes[i].quiet) continue;
         const toneName = getToneName(notes[i].note)
         const noteDuration = notes[i].duration * scalar
@@ -71,6 +75,8 @@ function playMeasure(context, measureIndex){
 
         synth.triggerAttackRelease(toneName, noteDuration, now + noteOffset);
     }
+    context.lastIndex = context.playbackIndex;
+
 
 }
 
@@ -78,10 +84,6 @@ function periodicTimer(context){
     const playIndex = context.ipf.playbackMap[context.playbackIndex];
     playMeasure(context, playIndex);
     context.playbackIndex++;
-    if( !context.testMode ) {
-        context.playbackIndex = 0;
-        context.lastIndex = 0;
-    }
 }
 
 function restart(context){
@@ -89,11 +91,6 @@ function restart(context){
     context.lastIndex = 0;
 }
 
-function stopPlay(context){
-    context.pause     = true;  // Stop playback
-    context.testMode  = false; // Disable test mode
-    context.lastIndex = 0;     // Reset index
-}
 function pausePlay(context){
     context.pause = true;
     enableInput(restartButton)
@@ -101,8 +98,8 @@ function pausePlay(context){
 
 function startPeriodicTimer(interval, context){
     context.playbackIndex = context.lastIndex;
-    periodicTimer(context);
     console.log(context.playbackIndex)
+    periodicTimer(context);
     const timer =  setInterval(() => {
         if(context.playbackIndex == context.ipf.playbackMap.length - 1 || context.pause){
             clearInterval(timer)
@@ -149,14 +146,16 @@ startPauseButton.addEventListener('change', async function ( e ) {
 startTestButton.addEventListener('change', async function ( e ) {
     const state = startTestButton.checked
     if ( state ) {
+        dispatchEvent(startRecording) // Signal recorder to start recording
         await Tone.start()
         ApplicationContext.testStartTimestamp = Date.now();
+        ApplicationContext.lastIndex          = 0
         ApplicationContext.currentNPB         = [];
         ApplicationContext.testMode           = true;
         play(ApplicationContext.ipf, 1000, ApplicationContext)
     } else if ( !state ){
-        stopPlay(ApplicationContext)
-        // getResults(ApplicationContext)
+        dispatchEvent(stopRecording) // Signal recorder to stop recording
+        ApplicationContext.pause = true;        // Stop playback
     }
 });
 

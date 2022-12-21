@@ -1,6 +1,8 @@
 // Static strings
 const PATH = "./mxl/"
 
+const AUDIOSAVE = document.getElementById("recorded-audio")
+
 // Initialize application context
 const ApplicationContext = {
         currentMeasure: 0,
