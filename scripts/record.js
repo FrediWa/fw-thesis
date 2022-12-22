@@ -6,34 +6,51 @@
   //   // Link to pretrained CREPE model
   //   const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
 
-  //   function getPitch(error, frequency) {
-  //       if (error) {
-  //         console.error(error);
-  //       } else {
-  //         if (frequency && !ApplicationContext.testMode) {
-
-  //           ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
-  //           const approxMidi = approxFrequencyToMidi(frequency);
-  //           console.log(getToneName(approxMidi))
-  //           console.log(ApplicationContext.playbackIndex)
-  //         }
-  //       }
-  //     }
+  //   
   //   // When the model is loaded
-  //   function modelLoaded() {
-  //       console.log('Model Loaded!');
-  //       while(!ApplicationContext.pause){
-  //         console.log("Analyzing")
-  //         pitch.getPitch(getPitch);
-  //       }
-  //   };
+  //   
  // Init media recorder
-//  pitch = ml5.pitchDetection(
-//   model_url,
-//   audioContext,
-//   stream,
-//   modelLoaded,
-// );
+// 
+
+let pitch;
+function getPitch(error, frequency) {
+  console.log("Get pitch")
+  if (error) {
+    console.error(error);
+  } else {
+    console.log(frequency)
+    if (frequency) {
+      
+      ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
+      const approxMidi = approxFrequencyToMidi(frequency);
+      console.log(getToneName(approxMidi))
+      console.log(ApplicationContext.playbackIndex)
+    }
+  }
+  pitch.getPitch(getPitch);
+}
+function modelLoaded() {
+  console.log('Model Loaded!');
+  
+  pitch.getPitch(getPitch);
+  
+};
+function analyze(srcElemenent, chunks){
+  console.log("Analyzing...")
+  const audioContext = new AudioContext();
+  const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';  
+  const stream = srcElemenent.captureStream()
+  chunks.forEach(c => {
+    console.log(c)
+  })
+  console.log("Stream", stream)
+  pitch = ml5.pitchDetection(
+    model_url,
+    audioContext,
+    stream,
+    modelLoaded,
+  );
+}
 
 function recordAudio(){
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -45,26 +62,30 @@ function recordAudio(){
     // Record
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       // Record incoming stream
-      console.log("WALLAHI")
+      console.log("WALLAHI", stream)
       const recording = new MediaRecorder(stream)
       let chunks = []
+      recording.start(1000)
 
       // Push chunks as they keep coming
       recording.ondataavailable = (e) => {
-        console.log("Shalom")
         chunks.push(e.data)
       }
 
+      addEventListener("stopRecording", () => {
+        if(recording.state != "inactive") recording.stop()
+      })
+
       // Save chunks when recorder stops
       recording.onstop = (e) => {
+        stream.getTracks().forEach(track => track.stop())
         const blob     = new Blob(chunks, {type: "audio/mp3"});
         const audioURL = window.URL.createObjectURL(blob);
         AUDIOSAVE.src  = audioURL
-        chunks         = []
         AUDIOSAVE.play()
-        console.log("Bishmillah")
+        analyze(AUDIOSAVE, chunks)
+        chunks         = []
       }
-
     })
 
     // Error callback
@@ -77,9 +98,10 @@ function recordAudio(){
   }
 }
 
-addEventListener("stopRecording", () => console.log("Stop"))
+let mediaRecorder = null;
+
 
 addEventListener("startRecording", () => {
   console.log("SHALLAH")
-  recordAudio()
+  mediaRecorder = recordAudio()
 })

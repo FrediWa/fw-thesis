@@ -17,7 +17,7 @@ header { display: block; width: 100%; }
 }
 
 #osmd-container {
-    height: 80vh;
+    height: 50vh;
     width: 70%;
     margin: 0 auto;
     overflow-y: scroll;
@@ -26,7 +26,7 @@ header { display: block; width: 100%; }
 }
 
 #control-side {
-    height: 80vh;
+    height: 50vh;
     width: 15%;
     position: absolute;
     top:0; right: 0;
@@ -51,10 +51,6 @@ input#control-test-mode                                  { display: none;  font-
 input#control-test-mode:checked       ~ label i.fa-play  { display: none; }
 input#control-test-mode:not(:checked) ~ label i.fa-stop { display: none; }
 
-
-/* Track selection container*/
-#track-selection-section { margin-top: 100px; }
-
 #track-selection-container {
     width: 400px;
     margin: 0 auto;
@@ -69,3 +65,5 @@ input#control-test-mode:not(:checked) ~ label i.fa-stop { display: none; }
 #sheet-selection,
 #playback-selection,
 #collection-selection { width: 90%; margin: 10px 5%; }
+
+header { height: 20vh; }

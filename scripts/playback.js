@@ -77,7 +77,6 @@ function playMeasure(context, measureIndex){
     }
     context.lastIndex = context.playbackIndex;
 
-
 }
 
 function periodicTimer(context){

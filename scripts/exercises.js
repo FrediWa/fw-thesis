@@ -59,6 +59,8 @@ document.getElementById("collection-selection").addEventListener("change", () =>
 // Change current sheet
 document.getElementById("sheet-selection").addEventListener("change", () => {
     loadSheetMusic(document.getElementById("sheet-selection").value, ApplicationContext)
+    loadPlayback(document.getElementById("sheet-selection").value, ApplicationContext)
+    document.getElementById("playback-selection").value = document.getElementById("sheet-selection").value
 });
 
 // Change playback track
