@@ -25,6 +25,7 @@ const startToneButton  = document.getElementById("control-start-tone");
 const restartButton    = document.getElementById("control-play-restart");
 const cursorButton     = document.getElementById("control-cursor-show");
 const metronomeButton  = document.getElementById("control-metronome");
+const muteButton       = document.getElementById("control-mute-playback");
 const cursorElement    = document.getElementById("playback-cursor");
 
 // Init synth
@@ -68,7 +69,7 @@ function playMeasure(context, measureIndex){
     // Calculate how long a "beat" is in milliseconds
     const scalar = currentMeasure.timeSignature.denominator * calculateMSPB(currentMeasure);
     for( let i = 0; i < notes.length; i++){
-        if(notes[i].quiet) continue;
+        if(notes[i].quiet || context.mutePlayback) continue;
         const toneName = getToneName(notes[i].note)
         const noteDuration = notes[i].duration * scalar
         const noteOffset   = notes[i].offset   * scalar
@@ -158,19 +159,25 @@ startTestButton.addEventListener('change', async function ( e ) {
     }
 });
 
-cursorButton.addEventListener('change', async function ( e ) {
-    const state = cursorButton.checked
-    document.getElementById("cursorImg-0").style.opacity = state ? "1" : "0";
+// cursorButton.addEventListener('change', function ( e ) {
+//     const state = cursorButton.checked
+//     document.getElementById("cursorImg-0").style.opacity = state ? "1" : "0";
+// });
+
+muteButton.addEventListener('change', function ( e ) {
+    const state = muteButton.checked;
+    console.log("Button is", (state ? "muted" : "unmuted"))
+    ApplicationContext.mutePlayback = state;
 });
 
 restartButton.addEventListener("click", function ( e ){
     restart(ApplicationContext);
 });
 
-metronomeButton.addEventListener("click", function ( e ){
-    const state = metronomeButton.checked
-    ApplicationContext.metronome = state;
-});
+// metronomeButton.addEventListener("click", function ( e ){
+//     const state = metronomeButton.checked
+//     ApplicationContext.metronome = state;
+// });
 
 startToneButton.addEventListener("click", function ( e ){
     const startTone = ApplicationContext.ipf.measures[0].notes[0]

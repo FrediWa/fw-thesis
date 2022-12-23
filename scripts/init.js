@@ -19,6 +19,7 @@ const ApplicationContext = {
         timer: null,
         showCursor: true,
         currentNPB: [],
+        mutePlayback: false,
 }
 
 
