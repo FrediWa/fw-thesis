@@ -1,5 +1,6 @@
+// Register custom events
 const startRecording = new CustomEvent("startRecording")
-const stopRecording = new CustomEvent("stopRecording")
+const stopRecording  = new CustomEvent("stopRecording")
 
 // Get ToneJS compliant note strings
 function getToneName(semitone, keySignature) {
@@ -52,13 +53,36 @@ function moveCursorToMeasure(cursor, measureIndex) {
     while ( (cursor.iterator.currentMeasureIndex) < measureIndex ) cursor.next()
 
 }
+async function playNote(context, notes, i, scalar, cursor){
+    // Sleep function
+    // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    // Get duration of note
+    const noteDuration = notes[i].duration * scalar
+    // Play if note is not quiet
+    if(!notes[i].quiet || context.mutePlayback){
+        const toneName = getToneName(notes[i].note)
+        // Play note
+        synth.triggerAttackRelease(toneName, noteDuration, Tone.now());
+    }
+    
+    // Wait until playing next note
+    await sleep(noteDuration * 1000)
+
+    if(notes.length-1 > i){
+        if(!notes[i].quiet) cursor.next()
+        playNote(context, notes, i+1, scalar, cursor)
+    }
+    return
+}
+
 function playMeasure(context, measureIndex){
     // Cancel playback asap if pause
     if(context.pause) return;
 
     const cursor = context.osmd.cursor;
     const currentMeasure = context.ipf.measures[measureIndex];
-    const now = Tone.now()
+    
     cursor.show()
     moveCursorToMeasure(cursor, measureIndex);
 
@@ -68,14 +92,8 @@ function playMeasure(context, measureIndex){
 
     // Calculate how long a "beat" is in milliseconds
     const scalar = currentMeasure.timeSignature.denominator * calculateMSPB(currentMeasure);
-    for( let i = 0; i < notes.length; i++){
-        if(notes[i].quiet || context.mutePlayback) continue;
-        const toneName = getToneName(notes[i].note)
-        const noteDuration = notes[i].duration * scalar
-        const noteOffset   = notes[i].offset   * scalar
+    playNote(context, notes, 0, scalar, cursor)
 
-        synth.triggerAttackRelease(toneName, noteDuration, now + noteOffset);
-    }
     context.lastIndex = context.playbackIndex;
 
 }
@@ -155,7 +173,8 @@ startTestButton.addEventListener('change', async function ( e ) {
         play(ApplicationContext.ipf, 1000, ApplicationContext)
     } else if ( !state ){
         dispatchEvent(stopRecording) // Signal recorder to stop recording
-        ApplicationContext.pause = true;        // Stop playback
+        ApplicationContext.pause    = true;        // Stop playback
+        ApplicationContext.testMode = false;
     }
 });
 
@@ -184,4 +203,8 @@ startToneButton.addEventListener("click", function ( e ){
     const toneName  = getToneName(startTone.note)
     const now       = Tone.now()
     synth.triggerAttackRelease(toneName, 0.5, now);
+})
+
+addEventListener("pitchDetected", function ( e ){
+    console.log("E details", e.detail)
 })

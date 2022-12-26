@@ -14,7 +14,6 @@
 
 let pitch;
 function getPitch(error, frequency) {
-  console.log("Get pitch")
   if (error) {
     console.error(error);
   } else {
@@ -23,33 +22,23 @@ function getPitch(error, frequency) {
       
       ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
       const approxMidi = approxFrequencyToMidi(frequency);
-      console.log(getToneName(approxMidi))
-      console.log(ApplicationContext.playbackIndex)
+      const pitchDetected = new CustomEvent("pitchDetected", {detail: approxMidi})
+      dispatchEvent(pitchDetected)
     }
+
+    if(!ApplicationContext.testMode){
+      return
+    } 
+
+
+    pitch.getPitch(getPitch);
   }
-  pitch.getPitch(getPitch);
 }
 function modelLoaded() {
-  console.log('Model Loaded!');
-  
-  pitch.getPitch(getPitch);
-  
+  analyze()
 };
-function analyze(srcElemenent, chunks){
-  console.log("Analyzing...")
-  const audioContext = new AudioContext();
-  const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';  
-  const stream = srcElemenent.captureStream()
-  chunks.forEach(c => {
-    console.log(c)
-  })
-  console.log("Stream", stream)
-  pitch = ml5.pitchDetection(
-    model_url,
-    audioContext,
-    stream,
-    modelLoaded,
-  );
+function analyze(){
+  pitch.getPitch(getPitch);
 }
 
 function recordAudio(){
@@ -60,32 +49,19 @@ function recordAudio(){
     };
 
     // Record
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {      
+      const audioContext = new AudioContext();
+      const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';  
+
       // Record incoming stream
-      console.log("WALLAHI", stream)
-      const recording = new MediaRecorder(stream)
-      let chunks = []
-      recording.start(1000)
+      console.log("Stream", stream)
+      pitch = ml5.pitchDetection(
+        model_url,
+        audioContext,
+        stream,
+        modelLoaded,
+      );
 
-      // Push chunks as they keep coming
-      recording.ondataavailable = (e) => {
-        chunks.push(e.data)
-      }
-
-      addEventListener("stopRecording", () => {
-        if(recording.state != "inactive") recording.stop()
-      })
-
-      // Save chunks when recorder stops
-      recording.onstop = (e) => {
-        stream.getTracks().forEach(track => track.stop())
-        const blob     = new Blob(chunks, {type: "audio/mp3"});
-        const audioURL = window.URL.createObjectURL(blob);
-        AUDIOSAVE.src  = audioURL
-        AUDIOSAVE.play()
-        analyze(AUDIOSAVE, chunks)
-        chunks         = []
-      }
     })
 
     // Error callback
@@ -98,7 +74,6 @@ function recordAudio(){
   }
 }
 
-let mediaRecorder = null;
 
 
 addEventListener("startRecording", () => {

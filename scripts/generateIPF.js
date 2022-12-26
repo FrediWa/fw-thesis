@@ -136,13 +136,18 @@ function generateIPF(context){
                 // Blend slurs in different measures
                 if(note.sourceMeasure.measureNumber != previousMeasureNumber){
                     previousMeasureNumber = note.sourceMeasure.measureNumber;
-                    noteOffset = 0;
                 }
-                // Calculate anacrusis padding
-                if(anacrusis && i == 0)
-                    anacrusisPadding = currentTimeSignature.realValue - currentMeasureDuration.realValue
-
                 const measureIndex = note.sourceMeasure.measureListIndex
+                // Calculate anacrusis padding
+                if(anacrusis && i == 0 && j == 0){
+
+                    anacrusisPadding = currentTimeSignature.realValue - currentMeasureDuration.realValue
+                    IPF.measures[measureIndex].notes[0] = {
+                        "duration": anacrusisPadding,
+                        "quiet": true,
+                    }
+                }
+                    
 
                 if ( note != null) {
                     IPF.measures[measureIndex].notes.push({
@@ -150,9 +155,7 @@ function generateIPF(context){
                         "duration": note.length.realValue,
                         "tempo": note.sourceMeasure.tempoInBPM,
                         "quiet": ((note.slurs.length !== 0) && IPF.measures[measureIndex-1].notes.slur === true) || note.isRest(),
-                        "offset": noteOffset + anacrusisPadding
                     })
-                    noteOffset += note.length.realValue;
                 }
             }
         }
