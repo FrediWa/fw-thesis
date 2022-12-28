@@ -32,16 +32,14 @@ const cursorElement    = document.getElementById("playback-cursor");
 // Init synth
 const synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
-function calculateMSPB(measure){
+function calculateBeatLength(measure){
     const bpm = measure.tempo * measure.timeSignature.denominator / 4;
     const bps = bpm/60;
     return (1 / bps);
 }
 
 function calculateMeasureLength(measure){
-    const bpm = measure.tempo * measure.timeSignature.denominator / 4;
-    const bps = bpm / 60;
-    return measure.timeSignature.numerator / bps * 1000;
+    return measure.timeSignature.numerator * calculateBeatLength(measure) * 1000;
 }
 
 function moveCursor(cursor, steps) {
@@ -60,10 +58,14 @@ async function playNote(context, notes, i, scalar, cursor){
     // Get duration of note
     const noteDuration = notes[i].duration * scalar
     // Play if note is not quiet
-    if(!notes[i].quiet || context.mutePlayback){
-        const toneName = getToneName(notes[i].note)
+    const note = notes[i].note;
+    context.ipf.timestamps.push({note, "timestamp": Date.now()})
+    if(!notes[i].quiet && !context.mutePlayback){
+        const toneName = getToneName(note)
         // Play note
         synth.triggerAttackRelease(toneName, noteDuration, Tone.now());
+        
+       
     }
     
     // Wait until playing next note
@@ -78,7 +80,7 @@ async function playNote(context, notes, i, scalar, cursor){
 
 function playMeasure(context, measureIndex){
     // Cancel playback asap if pause
-    if(context.pause) return;
+    if( context.pause ) return;
 
     const cursor = context.osmd.cursor;
     const currentMeasure = context.ipf.measures[measureIndex];
@@ -91,7 +93,8 @@ function playMeasure(context, measureIndex){
     const notes = currentMeasure.notes;
 
     // Calculate how long a "beat" is in milliseconds
-    const scalar = currentMeasure.timeSignature.denominator * calculateMSPB(currentMeasure);
+    const scalar = currentMeasure.timeSignature.denominator * calculateBeatLength(currentMeasure);
+
     playNote(context, notes, 0, scalar, cursor)
 
     context.lastIndex = context.playbackIndex;
@@ -169,6 +172,7 @@ startTestButton.addEventListener('change', async function ( e ) {
         ApplicationContext.testStartTimestamp = Date.now();
         ApplicationContext.lastIndex          = 0
         ApplicationContext.currentNPB         = [];
+        ApplicationContext.errors                        = [];
         ApplicationContext.testMode           = true;
         play(ApplicationContext.ipf, 1000, ApplicationContext)
     } else if ( !state ){
@@ -178,10 +182,10 @@ startTestButton.addEventListener('change', async function ( e ) {
     }
 });
 
-// cursorButton.addEventListener('change', function ( e ) {
-//     const state = cursorButton.checked
-//     document.getElementById("cursorImg-0").style.opacity = state ? "1" : "0";
-// });
+cursorButton.addEventListener('change', function ( e ) {
+    const state = cursorButton.checked
+    document.getElementById("cursorImg-0").style.opacity = state ? "1" : "0";
+});
 
 muteButton.addEventListener('change', function ( e ) {
     const state = muteButton.checked;
@@ -193,18 +197,11 @@ restartButton.addEventListener("click", function ( e ){
     restart(ApplicationContext);
 });
 
-// metronomeButton.addEventListener("click", function ( e ){
-//     const state = metronomeButton.checked
-//     ApplicationContext.metronome = state;
-// });
-
 startToneButton.addEventListener("click", function ( e ){
-    const startTone = ApplicationContext.ipf.measures[0].notes[0]
+    // Find first note that isn't muted
+    const startTone = ApplicationContext.ipf.measures[0].notes.find(note => note.note != undefined)
     const toneName  = getToneName(startTone.note)
-    const now       = Tone.now()
-    synth.triggerAttackRelease(toneName, 0.5, now);
+
+    synth.triggerAttackRelease(toneName, 0.5, Tone.now());
 })
 
-addEventListener("pitchDetected", function ( e ){
-    console.log("E details", e.detail)
-})

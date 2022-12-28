@@ -17,13 +17,19 @@ function getPitch(error, frequency) {
   if (error) {
     console.error(error);
   } else {
-    console.log(frequency)
     if (frequency) {
-      
       ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
       const approxMidi = approxFrequencyToMidi(frequency);
-      const pitchDetected = new CustomEvent("pitchDetected", {detail: approxMidi})
-      dispatchEvent(pitchDetected)
+      console.log(getToneName(approxMidi))
+      // const pitchDetected = new CustomEvent("pitchDetected", {detail: approxMidi})
+    //   dispatchEvent(pitchDetected)
+    //   addEventListener("pitchDetected", function ( e ){
+    //     context.notesPlot.push({"detected": e.detail, "played": note})
+
+    //     if(e.detail == note) context.errors.push(0)
+    //     if(Math.abs(e.detail - note) % 12 == 0) context.errors.push(0)
+    //     if(Math.abs(e.detail - note) < 12 && e.detail != note) context.errors.push(Math.abs(e.detail - note))
+    // })
     }
 
     if(!ApplicationContext.testMode){

@@ -20,6 +20,9 @@ const ApplicationContext = {
         showCursor: true,
         currentNPB: [],
         mutePlayback: false,
+        detectedPlot: [],
+        errors: [],
+        notesPlot: []
 }
 
 

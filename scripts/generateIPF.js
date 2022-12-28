@@ -90,10 +90,12 @@ function generateIPF(context){
             const insertionIndex = repeatIterator[1] + 1 + totalShift;
 
             // Construct a playback map by appending it to the middle of itself at certain positions
-            playbackMap = [...playbackMap.slice(0, insertionIndex),   // Everything up to insertion index
-                           ...repeatedSection,                        // New instructions
-                           ...playbackMap.slice(insertionIndex)       // The rest
+            playbackMap = [
+                ...playbackMap.slice(0, insertionIndex),   // Everything up to insertion index
+                ...repeatedSection,                        // New instructions
+                ...playbackMap.slice(insertionIndex)       // The rest
             ]
+            
             // Increment shift
             totalShift += repeatedSection.length
         }
@@ -143,6 +145,7 @@ function generateIPF(context){
 
                     anacrusisPadding = currentTimeSignature.realValue - currentMeasureDuration.realValue
                     IPF.measures[measureIndex].notes[0] = {
+                        "note": undefined,
                         "duration": anacrusisPadding,
                         "quiet": true,
                     }
@@ -153,7 +156,6 @@ function generateIPF(context){
                     IPF.measures[measureIndex].notes.push({
                         "note": note.halfTone + 12,
                         "duration": note.length.realValue,
-                        "tempo": note.sourceMeasure.tempoInBPM,
                         "quiet": ((note.slurs.length !== 0) && IPF.measures[measureIndex-1].notes.slur === true) || note.isRest(),
                     })
                 }
@@ -161,6 +163,7 @@ function generateIPF(context){
         }
         iterator.moveToNext()
     }
+    IPF.timestamps = [];
 
     ApplicationContext.ipf = IPF;
 }
