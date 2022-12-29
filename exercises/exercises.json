@@ -34,6 +34,14 @@
             "tracks": [
                 {"id": 30, "name": "Fridolins Dårskap T1", "url": "mxl/Fridolins_dårksap.mxl"}
             ]
+        },
+        {
+            "collectionID": 4,
+            "collectionName": "Scales",
+            "tracks": [
+                {"id": 30, "name":"C-major scale", "url": "mxl/C-major_scale.mxl"},
+                {"id": 30, "name":"E-major scale", "url": "mxl/E-major_scale.mxl"}
+            ]
         }
     ]
 }
