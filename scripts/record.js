@@ -6,11 +6,11 @@
   //   // Link to pretrained CREPE model
   //   const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
 
-  //   
+  //
   //   // When the model is loaded
-  //   
+  //
  // Init media recorder
-// 
+//
 
 let pitch;
 function getPitch(error, frequency) {
@@ -18,24 +18,20 @@ function getPitch(error, frequency) {
     console.error(error);
   } else {
     if (frequency) {
-      ApplicationContext.currentNPB.push({timestamp: Date.now(), frequency})
       const approxMidi = approxFrequencyToMidi(frequency);
-      console.log(getToneName(approxMidi))
-      // const pitchDetected = new CustomEvent("pitchDetected", {detail: approxMidi})
-    //   dispatchEvent(pitchDetected)
-    //   addEventListener("pitchDetected", function ( e ){
-    //     context.notesPlot.push({"detected": e.detail, "played": note})
+      // console.log(getToneName(approxMidi))
+      const pitchDetected = new CustomEvent("pitchDetected", {detail: approxMidi})
 
-    //     if(e.detail == note) context.errors.push(0)
-    //     if(Math.abs(e.detail - note) % 12 == 0) context.errors.push(0)
-    //     if(Math.abs(e.detail - note) < 12 && e.detail != note) context.errors.push(Math.abs(e.detail - note))
-    // })
+      // Shitty stream
+      ApplicationContext.predictions.push(approxMidi); // Add
+      if(ApplicationContext.predictions.length > 30)
+        ApplicationContext.predictions.shift();        // Remove
+
     }
 
     if(!ApplicationContext.testMode){
       return
-    } 
-
+    }
 
     pitch.getPitch(getPitch);
   }
@@ -55,9 +51,9 @@ function recordAudio(){
     };
 
     // Record
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {      
+    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       const audioContext = new AudioContext();
-      const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';  
+      const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
 
       // Record incoming stream
       console.log("Stream", stream)

@@ -15,7 +15,7 @@ function getToneName(semitone, keySignature) {
 
 function approxFrequencyToMidi(frequency){
     // Formula from https://newt.phys.unsw.edu.au/jw/notes.html
-    const approxMidi = 12 * Math.log2(frequency / 440) + 69
+    const approxMidi = 12 * Math.log2(frequency / 440) + 69;
     return(Math.round(approxMidi));
 }
 
@@ -25,7 +25,6 @@ const startTestButton  = document.getElementById("control-test-mode");
 const startToneButton  = document.getElementById("control-start-tone");
 const restartButton    = document.getElementById("control-play-restart");
 const cursorButton     = document.getElementById("control-cursor-show");
-const metronomeButton  = document.getElementById("control-metronome");
 const muteButton       = document.getElementById("control-mute-playback");
 const cursorElement    = document.getElementById("playback-cursor");
 
@@ -52,6 +51,8 @@ function moveCursorToMeasure(cursor, measureIndex) {
 
 }
 async function playNote(context, notes, i, scalar, cursor){
+    // Cancel playback asap if pause
+    if( context.pause ) return;
     // Sleep function
     // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
     const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -64,15 +65,37 @@ async function playNote(context, notes, i, scalar, cursor){
         const toneName = getToneName(note)
         // Play note
         synth.triggerAttackRelease(toneName, noteDuration, Tone.now());
-        
-       
+
+        // Courtesy of ggorlen
+        // https://stackoverflow.com/questions/52898456/simplest-way-of-finding-mode-in-javascript?noredirect=1&lq=1
+        const mode = a =>
+        Object.values(
+            a.reduce((count, e) => {
+            if (!(e in count)) {
+                count[e] = [0, e];
+            }
+
+            count[e][0]++;
+            return count;
+            }, {})
+        ).reduce((a, v) => v[0] < a[0] ? a : v, [0, null])[1];
+
+        const streamMode = mode(context.predictions);
+        console.log(Math.abs(streamMode - note))
+        context.errors.push({
+            "measure": context.playbackIndex,
+            "note": i,
+            "error": Math.abs(streamMode - note)
+        })
     }
-    
+
     // Wait until playing next note
     await sleep(noteDuration * 1000)
 
-    if(notes.length-1 > i){
+    if(i < notes.length-1){
+        // Do not increment cursor if note is silent
         if(!notes[i].quiet) cursor.next()
+        // Play next note
         playNote(context, notes, i+1, scalar, cursor)
     }
     return
@@ -84,12 +107,10 @@ function playMeasure(context, measureIndex){
 
     const cursor = context.osmd.cursor;
     const currentMeasure = context.ipf.measures[measureIndex];
-    
+
     cursor.show()
     moveCursorToMeasure(cursor, measureIndex);
 
-    // Shitty metronome
-    if (context.metronome) synth.triggerAttackRelease("C7", now, 0.01)
     const notes = currentMeasure.notes;
 
     // Calculate how long a "beat" is in milliseconds
@@ -171,14 +192,14 @@ startTestButton.addEventListener('change', async function ( e ) {
         await Tone.start()
         ApplicationContext.testStartTimestamp = Date.now();
         ApplicationContext.lastIndex          = 0
-        ApplicationContext.currentNPB         = [];
-        ApplicationContext.errors                        = [];
+        ApplicationContext.errors             = [];
         ApplicationContext.testMode           = true;
         play(ApplicationContext.ipf, 1000, ApplicationContext)
     } else if ( !state ){
         dispatchEvent(stopRecording) // Signal recorder to stop recording
         ApplicationContext.pause    = true;        // Stop playback
         ApplicationContext.testMode = false;
+        console.log(ApplicationContext.errors)
     }
 });
 
