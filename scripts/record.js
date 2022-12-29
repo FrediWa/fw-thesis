@@ -19,13 +19,16 @@ function getPitch(error, frequency) {
   } else {
     if (frequency) {
       const approxMidi = approxFrequencyToMidi(frequency);
-      // console.log(getToneName(approxMidi))
-      const pitchDetected = new CustomEvent("pitchDetected", {detail: approxMidi})
+      
+
+      console.log("pred", approxMidi)
+      console.log("read", ApplicationContext.currentNotePlaying)
+      ApplicationContext.errors.push(Math.abs(approxMidi - ApplicationContext.currentNotePlaying))
 
       // Shitty stream
-      ApplicationContext.predictions.push(approxMidi); // Add
-      if(ApplicationContext.predictions.length > 30)
-        ApplicationContext.predictions.shift();        // Remove
+      // ApplicationContext.predictions.push(approxMidi); // Add
+      // if(ApplicationContext.predictions.length > 40)
+      //   ApplicationContext.predictions.shift();        // Remove
 
     }
 
@@ -56,7 +59,6 @@ function recordAudio(){
       const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
 
       // Record incoming stream
-      console.log("Stream", stream)
       pitch = ml5.pitchDetection(
         model_url,
         audioContext,

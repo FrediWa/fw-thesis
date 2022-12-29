@@ -79,14 +79,12 @@ async function playNote(context, notes, i, scalar, cursor){
             return count;
             }, {})
         ).reduce((a, v) => v[0] < a[0] ? a : v, [0, null])[1];
-
+        // console.log("predictions", context.predictions)
         const streamMode = mode(context.predictions);
-        console.log(Math.abs(streamMode - note))
-        context.errors.push({
-            "measure": context.playbackIndex,
-            "note": i,
-            "error": Math.abs(streamMode - note)
-        })
+        // console.log("note", getToneName(note))
+        context.currentNotePlaying = note;
+        // console.log("mode - note error", Math.abs(streamMode - note))
+        
     }
 
     // Wait until playing next note
