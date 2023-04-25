@@ -9,7 +9,7 @@ function loadPlayback(trackName, context){
   .load(trackName)
   .then(function(){
     osmd.render();
-    generateIPF(context)
+    context.ipf = generateIPF(context, context.playbackOsmd)
   })
 }
 
@@ -33,6 +33,9 @@ function loadSheetMusic(trackName, context){
       document.querySelector("#load-overlay").style.opacity = 0;
       document.querySelector("#load-overlay").style.height = 0;
       document.querySelector("#osmd-container").style.opacity = 1;
+      console.log("ctx", context)
+      
+      context.sheetIPF = generateIPF(context, context.osmd)
 
     }
     );

@@ -7,21 +7,14 @@ function isAnacrusis(timeSignature, measureDuration) {
 }
 
 
-function generateIPF(context){
+function generateIPF(context, osmd){
 
     const IPF = {"playbackMap": [], "measures":[], "startAnacrusis": false};
     const repeatMap = [];
-    const sheetOsmd = context.osmd
-    const playbackOsmd = context.playbackOsmd;
-    const playbackMeasures = playbackOsmd.graphic.measureList;
-    const sheetMeasures = sheetOsmd.graphic.measureList;
+    console.log("osmd", osmd)
+    const playbackMeasures = osmd.graphic.measureList;
 
-    // Assert that both OSMD object are atleast the same length
-    const enableLengthAssertion = true;
-    if ( playbackMeasures.length !== sheetMeasures.length  && enableLengthAssertion) {
-        console.error("Graphic and playback length mismatch");
-        return undefined;
-    }
+   
 
     /* ---------- Extract measure and repeat information ---------- */
 
@@ -60,8 +53,6 @@ function generateIPF(context){
             repeatStart = 0;
         }
 
-
-
     }
         // Handle Da Capo and similar instructions
         const repeatTypes = [
@@ -69,7 +60,7 @@ function generateIPF(context){
             9, // DC AF
             10 // DS AC
     ]; // List of enums according to OSMD's RepetitionInstructions.ts
-    const lastMeasureRepetitionInstructions = context.playbackOsmd.sheet.sourceMeasures.slice(-1)[0].lastRepetitionInstructions[0];
+    const lastMeasureRepetitionInstructions = context.osmd.sheet.sourceMeasures.slice(-1)[0].lastRepetitionInstructions[0];
     const dc = repeatTypes.includes(lastMeasureRepetitionInstructions?.type);
 
     /* ---------- Construct playbackMap ---------- */
@@ -115,8 +106,9 @@ function generateIPF(context){
     // small changes made
 
     // Reset cursor
-    playbackOsmd.cursor.reset()
-    const iterator = playbackOsmd.cursor.Iterator;
+    
+    osmd.cursor.reset()
+    const iterator = osmd.cursor.Iterator;
     let noteOffset = 0;
     let anacrusisPadding = 0;
     let previousMeasureNumber = 0;
@@ -165,5 +157,5 @@ function generateIPF(context){
     }
     IPF.timestamps = [];
 
-    ApplicationContext.ipf = IPF;
+    return IPF;
 }

@@ -50,6 +50,47 @@ function moveCursorToMeasure(cursor, measureIndex) {
     while ( (cursor.iterator.currentMeasureIndex) < measureIndex ) cursor.next()
 
 }
+
+async function checkSheetNote(context, notes, i, scalar){
+    // Cancel playback asap if pause
+    if( context.pause ) return;
+    // Sleep function
+    // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    // Get duration of note
+    const noteDuration = notes[i].duration * scalar
+    // Play if note is not quiet
+    const note = notes[i].note;
+    if(!notes[i].quiet && !context.mutePlayback){
+
+        // Courtesy of ggorlen
+        // https://stackoverflow.com/questions/52898456/simplest-way-of-finding-mode-in-javascript?noredirect=1&lq=1
+        const mode = a =>
+        Object.values(
+            a.reduce((count, e) => {
+            if (!(e in count)) {
+                count[e] = [0, e];
+            }
+
+            count[e][0]++;
+            return count;
+            }, {})
+        ).reduce((a, v) => v[0] < a[0] ? a : v, [0, null])[1];
+
+        const streamMode = mode(context.predictions);
+        console.log("error", streamMode-note, note)
+        context.errors.push({"pred": streamMode, "note": note})   
+    }
+
+    // Wait until playing next note
+    await sleep(noteDuration * 1000)
+
+    if(i < notes.length-1){
+        checkSheetNote(context, notes, i+1, scalar)
+    }
+    return
+}
+
 async function playNote(context, notes, i, scalar, cursor){
     // Cancel playback asap if pause
     if( context.pause ) return;
@@ -65,26 +106,6 @@ async function playNote(context, notes, i, scalar, cursor){
         const toneName = getToneName(note)
         // Play note
         synth.triggerAttackRelease(toneName, noteDuration, Tone.now());
-
-        // Courtesy of ggorlen
-        // https://stackoverflow.com/questions/52898456/simplest-way-of-finding-mode-in-javascript?noredirect=1&lq=1
-        const mode = a =>
-        Object.values(
-            a.reduce((count, e) => {
-            if (!(e in count)) {
-                count[e] = [0, e];
-            }
-
-            count[e][0]++;
-            return count;
-            }, {})
-        ).reduce((a, v) => v[0] < a[0] ? a : v, [0, null])[1];
-        // console.log("predictions", context.predictions)
-        const streamMode = mode(context.predictions);
-        // console.log("note", getToneName(note))
-        context.currentNotePlaying = note;
-        // console.log("mode - note error", Math.abs(streamMode - note))
-        
     }
 
     // Wait until playing next note
@@ -105,16 +126,19 @@ function playMeasure(context, measureIndex){
 
     const cursor = context.osmd.cursor;
     const currentMeasure = context.ipf.measures[measureIndex];
+    const currentSheetMeasure = context.sheetIPF.measures[measureIndex + (measureIndex > 0 ? -1 : 0)];
 
     cursor.show()
     moveCursorToMeasure(cursor, measureIndex);
 
     const notes = currentMeasure.notes;
+    const sheetNotes = currentSheetMeasure.notes
 
     // Calculate how long a "beat" is in milliseconds
     const scalar = currentMeasure.timeSignature.denominator * calculateBeatLength(currentMeasure);
 
     playNote(context, notes, 0, scalar, cursor)
+    checkSheetNote(context, sheetNotes, 0, scalar)
 
     context.lastIndex = context.playbackIndex;
 

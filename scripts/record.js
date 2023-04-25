@@ -21,14 +21,16 @@ function getPitch(error, frequency) {
       const approxMidi = approxFrequencyToMidi(frequency);
       
 
-      console.log("pred", approxMidi)
-      console.log("read", ApplicationContext.currentNotePlaying)
-      ApplicationContext.errors.push(Math.abs(approxMidi - ApplicationContext.currentNotePlaying))
-
+      // console.log("pred", approxMidi)
+      // console.log("read", ApplicationContext.currentNotePlaying)
+      ApplicationContext.predictions.push(approxMidi)
+      console.log("push");
+      if(ApplicationContext.predictions.length > 10)
+        ApplicationContext.predictions.shift()
       // Shitty stream
       // ApplicationContext.predictions.push(approxMidi); // Add
       // if(ApplicationContext.predictions.length > 40)
-      //   ApplicationContext.predictions.shift();        // Remove
+        // ApplicationContext.predictions.shift();        // Remove
 
     }
 
@@ -40,6 +42,7 @@ function getPitch(error, frequency) {
   }
 }
 function modelLoaded() {
+  console.log("Model loaded")
   analyze()
 };
 function analyze(){
